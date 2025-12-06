@@ -1,0 +1,8 @@
+//
+//  MoreScreen.swift
+//  HalalMapPrime
+//
+//  Created by zaid nahleh on 12/3/25.
+//
+
+import Foundation
