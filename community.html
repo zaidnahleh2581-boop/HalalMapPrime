@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Halal Map Prime — Community Story</title>
+  <meta name="description" content="Halal Map Prime is a community-driven platform designed to connect people to trusted places and services." />
+
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#101723;
+      --text:#e9eef7;
+      --muted:#a8b3c7;
+      --line:rgba(255,255,255,.10);
+      --accent:#caa75b;
+      --max: 980px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
+      background: radial-gradient(1200px 600px at 20% -10%, rgba(202,167,91,.22), transparent 60%),
+                  radial-gradient(900px 500px at 90% 10%, rgba(120,170,255,.16), transparent 55%),
+                  var(--bg);
+      color:var(--text);
+      line-height:1.6;
+    }
+    a{color:inherit}
+    .wrap{max-width:var(--max); margin:0 auto; padding:28px 18px 70px;}
+    header{
+      padding:34px 18px;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(16,23,35,.85), rgba(16,23,35,.55));
+      border-radius:16px;
+      overflow:hidden;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+      margin-bottom:14px;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 12px; border:1px solid var(--line);
+      border-radius:999px; color:var(--muted); font-size:13px;
+      background: rgba(0,0,0,.18);
+    }
+    h1{margin:8px 0 10px; font-size:34px; letter-spacing:.2px;}
+    .sub{margin:0; color:var(--muted); font-size:16px; max-width:70ch;}
+    nav{
+      margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 14px; border-radius:10px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.16);
+      text-decoration:none;
+      font-weight:600;
+    }
+    .btn.primary{
+      border-color: rgba(202,167,91,.55);
+      background: rgba(202,167,91,.12);
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+      margin-top:18px;
+    }
+    @media (min-width: 920px){
+      .grid{grid-template-columns: 1.15fr .85fr;}
+    }
+    .card{
+      border:1px solid var(--line);
+      background: rgba(16,23,35,.55);
+      border-radius:16px;
+      padding:18px;
+    }
+    .card h2{margin:0 0 10px; font-size:20px;}
+    .card p{margin:0 0 12px; color:var(--text);}
+    .muted{color:var(--muted)}
+    ul{margin:10px 0 0 18px; padding:0}
+    li{margin:8px 0; color:var(--text)}
+    .quote{
+      margin-top:14px;
+      padding:14px 14px;
+      border-left:4px solid var(--accent);
+      background: rgba(0,0,0,.20);
+      border-radius:12px;
+      color: var(--text);
+      font-weight:600;
+    }
+    .split{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:14px;
+    }
+    @media (min-width: 920px){
+      .split{grid-template-columns: 1fr;}
+    }
+    .lang-title{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .tag{
+      font-size:12px; color:var(--muted);
+      border:1px solid var(--line);
+      padding:6px 10px; border-radius:999px;
+      background: rgba(0,0,0,.14);
+    }
+    .rtl{direction:rtl; text-align:right; font-family: "Geeza Pro","SF Arabic","Tahoma",Arial,sans-serif;}
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+      opacity:.9;
+    }
+    .small{font-size:13px}
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+
+    <header>
+      <div class="brand">
+        <span class="badge">Halal Map Prime</span>
+        <span class="badge">Community Vision</span>
+        <span class="badge">New York • Built with care</span>
+      </div>
+
+      <h1>A Community Story</h1>
+      <p class="sub">
+        A respectful, community-driven vision—built to connect people to trusted places and services with clarity, care, and responsibility.
+      </p>
+
+      <nav>
+        <a class="btn primary" href="#english">Read in English</a>
+        <a class="btn" href="#arabic">اقرأ بالعربية</a>
+        <a class="btn" href="/">Back to Home</a>
+      </nav>
+    </header>
+
+    <section class="grid">
+      <div class="card" id="english">
+        <div class="lang-title">
+          <h2>English</h2>
+          <span class="tag">About / Vision</span>
+        </div>
+
+        <p><strong>Some ideas are born from technology. Others are born from real life. Halal Map Prime was born from people.</strong></p>
+
+        <p>
+          New York is one of the most diverse cities in the world. Millions of people from different cultures, languages, and beliefs share the same streets,
+          neighborhoods, and daily routines.
+        </p>
+
+        <p>
+          Yet for many families, newcomers, small business owners, and community members, finding trusted, culturally aligned places and services is still not simple.
+        </p>
+
+        <p>
+          Halal Map Prime is a community-driven platform designed to <strong>connect people to what they need, where they are, and who they trust</strong>.
+        </p>
+
+        <p>This project is not just about food. It is about:</p>
+        <ul>
+          <li>Supporting small local businesses</li>
+          <li>Making cities more accessible for everyone</li>
+          <li>Helping people feel less lost in a big, fast-moving city</li>
+          <li>Strengthening community ties through technology</li>
+        </ul>
+
+        <p class="quote">People deserve tools that understand them.</p>
+
+        <p class="muted small">
+          New York is our starting point because it represents the world in one city. If something can work here—across cultures, languages, and communities—it can work anywhere.
+        </p>
+      </div>
+
+      <aside class="card" id="arabic">
+        <div class="lang-title">
+          <h2>العربية</h2>
+          <span class="tag">تعريف / رؤية</span>
+        </div>
+
+        <div class="rtl">
+          <p><strong>بعض الأفكار تولد من التكنولوجيا، وأخرى تولد من الواقع. حلال ماب برايم وُلد من الناس.</strong></p>
+
+          <p>
+            نيويورك واحدة من أكثر المدن تنوعًا في العالم. ملايين الأشخاص من ثقافات ولغات وخلفيات مختلفة يعيشون في نفس الأحياء، ويتشاركون نفس الشوارع والحياة اليومية.
+          </p>
+
+          <p>
+            ومع ذلك، ما زال كثير من العائلات، القادمين الجدد، وأصحاب المشاريع الصغيرة يواجهون صعوبة في الوصول إلى أماكن وخدمات موثوقة تناسب احتياجاتهم وقيمهم.
+          </p>
+
+          <p>
+            حلال ماب برايم هو مشروع مجتمعي يهدف إلى <strong>ربط الناس بما يحتاجونه، في أماكنهم، وبطريقة يشعرون فيها بالثقة والاطمئنان</strong>.
+          </p>
+
+          <p>هذا المشروع ليس فقط عن الطعام. بل هو عن:</p>
+          <ul>
+            <li>دعم المشاريع الصغيرة المحلية</li>
+            <li>تسهيل الحياة داخل المدن الكبيرة</li>
+            <li>مساعدة الناس على الشعور بالانتماء</li>
+            <li>تقوية الروابط المجتمعية باستخدام التكنولوجيا</li>
+          </ul>
+
+          <p class="quote">الناس يستحقون أدوات تفهمهم.</p>
+
+          <p class="muted small">
+            اخترنا نيويورك كنقطة بداية لأنها تمثل العالم في مدينة واحدة. إذا نجح الحل هنا، فهو قابل للنجاح في أي مكان.
+          </p>
+        </div>
+      </aside>
+    </section>
+
+    <footer>
+      © <span id="y"></span> Halal Map Prime — Built with respect for the community.
+    </footer>
+
+  </main>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
