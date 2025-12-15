@@ -16,6 +16,8 @@
 		151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* FreeAdFormView.swift */; };
 		151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F22EE597800065F10C /* MyAdsView.swift */; };
 		15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */; };
+		15777EA72EF0391B00C2B089 /* CategoryBrowseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */; };
+		15777EAD2EF03CE400C2B089 /* PlaceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15777EAC2EF03CE400C2B089 /* PlaceCardView.swift */; };
 		1578D8862EE33C8C0053A7CE /* JobAdsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1578D8852EE33C8C0053A7CE /* JobAdsScreen.swift */; };
 		15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0D7872EE05AF00063ED79 /* MapScreen.swift */; };
 		15A0D7922EE05E4C0063ED79 /* PrayerTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0D7912EE05E4C0063ED79 /* PrayerTime.swift */; };
@@ -54,6 +56,8 @@
 		151BD9F02EE597570065F10C /* FreeAdFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeAdFormView.swift; sourceTree = "<group>"; };
 		151BD9F22EE597800065F10C /* MyAdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAdsView.swift; sourceTree = "<group>"; };
 		15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdComposerViewswift.swift; sourceTree = "<group>"; };
+		15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBrowseScreen.swift; sourceTree = "<group>"; };
+		15777EAC2EF03CE400C2B089 /* PlaceCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceCardView.swift; sourceTree = "<group>"; };
 		1578D8852EE33C8C0053A7CE /* JobAdsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdsScreen.swift; sourceTree = "<group>"; };
 		15A0D7732EE055040063ED79 /* HalalMapPrime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HalalMapPrime.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		15A0D7872EE05AF00063ED79 /* MapScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapScreen.swift; sourceTree = "<group>"; };
@@ -156,10 +160,12 @@
 				1578D8852EE33C8C0053A7CE /* JobAdsScreen.swift */,
 				15A0D7992EE0605D0063ED79 /* PlaceRowView.swift */,
 				15A0D79B2EE060900063ED79 /* PlaceDetailView.swift */,
+				15777EAC2EF03CE400C2B089 /* PlaceCardView.swift */,
 				15A0D79D2EE0626B0063ED79 /* AddStoreScreen.swift */,
 				15B48CDB2EE1A70C00A88AB7 /* AddStoreViewModel.swift */,
 				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
 				15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */,
+				15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -292,6 +298,8 @@
 				15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */,
 				1578D8862EE33C8C0053A7CE /* JobAdsScreen.swift in Sources */,
 				15B48CDC2EE1A70C00A88AB7 /* AddStoreViewModel.swift in Sources */,
+				15777EAD2EF03CE400C2B089 /* PlaceCardView.swift in Sources */,
+				15777EA72EF0391B00C2B089 /* CategoryBrowseScreen.swift in Sources */,
 				15A0D7922EE05E4C0063ED79 /* PrayerTime.swift in Sources */,
 				151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */,
 				15A0D7A02EE068740063ED79 /* BannerAd.swift in Sources */,

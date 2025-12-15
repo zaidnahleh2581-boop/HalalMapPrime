@@ -1,101 +1,192 @@
+//
+//  PlaceDetailView.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-15.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 import MapKit
 
 struct PlaceDetailView: View {
+
+    @EnvironmentObject var lang: LanguageManager
+    @Environment(\.openURL) private var openURL
+
     let place: Place
-    
+
+    @State private var showShareSheet: Bool = false
+
+    private func L(_ ar: String, _ en: String) -> String {
+        lang.isArabic ? ar : en
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                
-                // الاسم
-                Text(place.name)
-                    .font(.title2.bold())
-                    .foregroundColor(.primary)
-                
-                // العنوان
+            VStack(alignment: .leading, spacing: 14) {
+
+                // Title + badges
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 10) {
+                        Text(place.name)
+                            .font(.title2.bold())
+                            .foregroundColor(.primary)
+
+                        Spacer()
+
+                        if place.isCertified {
+                            Text(L("حلال ✅", "Halal ✅"))
+                                .font(.caption2.bold())
+                                .padding(.vertical, 5)
+                                .padding(.horizontal, 10)
+                                .background(Color.green.opacity(0.18))
+                                .clipShape(Capsule())
+                        }
+                    }
+
+                    // Rating line
+                    HStack(spacing: 8) {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.caption)
+
+                        Text(String(format: "%.1f", place.rating))
+                            .font(.caption.weight(.semibold))
+
+                        Text("(\(place.reviewCount))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+
+                        if place.deliveryAvailable {
+                            Spacer()
+                            Label(L("توصيل", "Delivery"), systemImage: "bicycle")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundColor(.green)
+                        }
+                    }
+                }
+
+                // Address
                 VStack(alignment: .leading, spacing: 4) {
                     Text(place.address)
+                        .font(.subheadline)
                     Text(place.cityState)
                         .foregroundColor(.secondary)
-                        .font(.subheadline)
+                        .font(.footnote)
                 }
-                
-                // معلومات عامة (التقييم – التوصيل – الشهادة)
-                HStack(spacing: 12) {
-                    Label("\(String(format: "%.1f", place.rating)) ⭐️", systemImage: "star.fill")
-                    
-                    Label("\(place.reviewCount) reviews",
-                          systemImage: "person.3.fill")
-                    
-                    if place.deliveryAvailable {
-                        Label("Delivery", systemImage: "bicycle")
+
+                // Actions: Directions + Share
+                HStack(spacing: 10) {
+                    Button {
+                        openDirections()
+                    } label: {
+                        Label(L("الاتجاهات", "Directions"), systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
-                    
-                    if place.isCertified {
-                        Label("Certified", systemImage: "checkmark.seal.fill")
+                    .buttonStyle(.plain)
+
+                    Button {
+                        showShareSheet = true
+                    } label: {
+                        Label(L("مشاركة", "Share"), systemImage: "square.and.arrow.up")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(Color(.systemGray6))
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
+                    .buttonStyle(.plain)
                 }
-                .font(.footnote)
-                .foregroundColor(.secondary)
-                
-                // وصف حسب الـ Category
+
+                // About
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("About this place")
+                    Text(L("عن هذا المكان", "About this place"))
                         .font(.headline)
-                    
+
                     Text(categoryDescription)
                         .font(.subheadline)
                         .foregroundColor(.primary)
                 }
-                
-                // خريطة صغيرة للمكان (اختياري)
-                Map(coordinateRegion: .constant(
-                    MKCoordinateRegion(
-                        center: place.coordinate,
-                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                    )
-                ),
+
+                // Mini Map
+                Map(
+                    coordinateRegion: .constant(
+                        MKCoordinateRegion(
+                            center: place.coordinate,
+                            span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                        )
+                    ),
                     annotationItems: [place]
-                ) { place in
-                    MapMarker(coordinate: place.coordinate, tint: .red)
+                ) { p in
+                    MapMarker(coordinate: p.coordinate, tint: .red)
                 }
                 .frame(height: 200)
-                .cornerRadius(12)
+                .cornerRadius(14)
             }
             .padding()
         }
-        .navigationTitle("Details")
+        .navigationTitle(L("التفاصيل", "Details"))
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(items: shareItems)
+        }
     }
-    
-    /// نص الوصف حسب نوع المكان
+
+    // MARK: - Share content
+
+    private var shareItems: [Any] {
+        let text = """
+        \(place.name)
+        \(place.address), \(place.cityState)
+        """
+
+        // Apple Maps URL
+        let urlString = "https://maps.apple.com/?q=\(urlEncoded(place.name))&ll=\(place.latitude),\(place.longitude)"
+        if let url = URL(string: urlString) {
+            return [text, url]
+        } else {
+            return [text]
+        }
+    }
+
+    private func urlEncoded(_ s: String) -> String {
+        s.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? s
+    }
+
+    // MARK: - Actions
+
+    private func openDirections() {
+        let name = urlEncoded(place.name)
+        let urlString = "maps://?q=\(name)&ll=\(place.latitude),\(place.longitude)"
+        if let url = URL(string: urlString) {
+            openURL(url)
+        }
+    }
+
     private var categoryDescription: String {
         switch place.category {
         case .restaurant:
-            return "Halal restaurant. Dine-in, take-out, or delivery available."
-            
+            return L("مطعم حلال. تناول داخل المطعم أو سفري أو توصيل.", "Halal restaurant. Dine-in, take-out, or delivery.")
         case .grocery:
-            return "Grocery / supermarket offering halal and Muslim-friendly products."
-            
+            return L("بقالة/سوبرماركت بمنتجات حلال وملائمة للمسلمين.", "Grocery / supermarket offering halal-friendly products.")
         case .school:
-            return "Islamic school or weekend program for kids and youth."
-            
+            return L("مدرسة إسلامية أو برنامج تعليمي للمجتمع.", "Islamic school or community education program.")
         case .mosque:
-            return "Mosque / masjid for daily prayers, Jumu’ah, and community events."
-            
+            return L("مسجد للصلاة والجمعة والفعاليات المجتمعية.", "Mosque / masjid for prayers, Jumu’ah and community events.")
         case .service:
-            return "Halal-friendly services for the Muslim community."
-            
+            return L("خدمات تخدم المجتمع المسلم.", "Services that support the Muslim community.")
         case .market:
-            return "Market / bazaar with multiple halal vendors or stalls."
-            
+            return L("سوق/بازار يضم بائعين أو محلات حلال.", "Market / bazaar with halal vendors or stalls.")
         case .shop:
-            return "Halal shop / retail store with Muslim-friendly products."
-            
-            // أي نوع ثاني (Food Truck، أو غيره) يطيح هنا
+            return L("محل/متجر بمنتجات ملائمة للمسلمين.", "Shop / retail store with Muslim-friendly products.")
         default:
-            return "Halal place or service listed on Halal Map Prime."
+            return L("مكان أو خدمة حلال ضمن حلال ماب برايم.", "Halal place or service listed on Halal Map Prime.")
         }
     }
 }

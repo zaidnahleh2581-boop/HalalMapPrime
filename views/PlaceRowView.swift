@@ -1,62 +1,87 @@
+//
+//  PlaceRowView.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-15.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
 struct PlaceRowView: View {
     let place: Place
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(place.name)
-                    .font(.headline)
-                    .foregroundColor(.white)
-                
-                if place.isCertified {
-                    Image(systemName: "checkmark.seal.fill")
-                        .foregroundColor(.green)
-                }
-                
-                Spacer()
-                
-                Text(place.category.rawValue)
-                    .font(.caption)
-                    .padding(6)
-                    .background(Color.yellow.opacity(0.2))
-                    .cornerRadius(8)
-                    .foregroundColor(.yellow)
+        HStack(spacing: 12) {
+
+            // Emoji + small dot
+            VStack(spacing: 6) {
+                Text(place.category.emoji)
+                    .font(.title3)
+                Circle()
+                    .fill(place.category.mapColor)
+                    .frame(width: 8, height: 8)
             }
-            
-            Text("\(place.address), \(place.cityState)")
-                .font(.caption)
-                .foregroundColor(.gray)
-            
-            HStack(spacing: 4) {
-                ForEach(0..<5) { index in
-                    Image(systemName: index < Int(round(place.rating)) ? "star.fill" : "star")
+            .frame(width: 34)
+
+            VStack(alignment: .leading, spacing: 6) {
+
+                HStack {
+                    Text(place.name)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+
+                    if place.isCertified {
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundColor(.green)
+                    }
+
+                    Spacer()
+
+                    Text(place.category.displayName)
+                        .font(.caption2.weight(.semibold))
+                        .padding(.vertical, 4)
+                        .padding(.horizontal, 8)
+                        .background(Color(.systemGray6))
+                        .clipShape(Capsule())
+                        .foregroundColor(.secondary)
+                }
+
+                Text("\(place.address), \(place.cityState)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(2)
+
+                HStack(spacing: 6) {
+                    Image(systemName: "star.fill")
                         .font(.caption2)
                         .foregroundColor(.yellow)
-                }
-                
-                Text(String(format: "%.1f", place.rating))
-                    .font(.caption2)
-                    .foregroundColor(.yellow)
-                
-                Text("(\(place.reviewCount))")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                
-                Spacer()
-                
-                if place.deliveryAvailable {
-                    Text("Delivery")
+
+                    Text(String(format: "%.1f", place.rating))
+                        .font(.caption2.weight(.semibold))
+                        .foregroundColor(.primary)
+
+                    Text("(\(place.reviewCount))")
                         .font(.caption2)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(Color.green.opacity(0.3))
-                        .cornerRadius(6)
-                        .foregroundColor(.green)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    if place.deliveryAvailable {
+                        Text("Delivery")
+                            .font(.caption2.weight(.semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.green.opacity(0.16))
+                            .clipShape(Capsule())
+                            .foregroundColor(.green)
+                    }
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .contentShape(Rectangle())
     }
 }

@@ -1,3 +1,12 @@
+//
+//  MapScreen.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-15.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 import MapKit
 
@@ -7,31 +16,37 @@ struct MapScreen: View {
     @EnvironmentObject var lang: LanguageManager
     @StateObject private var viewModel = MapScreenViewModel()
 
-    @State private var selectedCategory: PlaceCategory? = nil
     @State private var searchText: String = ""
     @State private var showResults: Bool = true
     @State private var selectedPlace: Place? = nil
 
-    @State private var showCategoriesRow: Bool = false // إظهار / إخفاء صف الكاتيجوري
+    // Navigation
+    @State private var showMoreCategories: Bool = false
+    @State private var pushCategory: PlaceCategory? = nil
+
+    // ✅ Top categories (4 فقط) — حسب خيار A
+    private let topCategories: [PlaceCategory] = [.restaurant, .foodTruck, .market, .mosque]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
 
-                    // HEADER + SEARCH + CATEGORIES
+                    // HEADER + SEARCH
                     header
                     searchBar
-                    categoryFilters
+
+                    // ✅ Top Categories (4 + More)
+                    topCategoryBar
 
                     // 🔺 إعلان Prime كبير أعلى الصفحة (إسلامي الهوية)
                     topAdsSection
                         .padding(.horizontal)
 
-                    // 🗺 الخريطة (أكبر عشان تبان أكثر)
+                    // 🗺 الخريطة
                     mapView
 
-                    // 🔻 شريط متحرّك صغير لــ Prime Highlights (مطاعم/مساجد/تموين)
+                    // 🔻 شريط متحرّك صغير لــ Prime Highlights
                     primeHighlightsCarousel
                         .padding(.horizontal)
 
@@ -46,6 +61,24 @@ struct MapScreen: View {
             .navigationDestination(item: $selectedPlace) { place in
                 PlaceDetailView(place: place)
             }
+            // ✅ صفحة الفئة (Reusable)
+            .navigationDestination(item: $pushCategory) { category in
+                CategoryBrowseScreen(category: category)
+                    .environmentObject(lang)
+            }
+            // ✅ More Sheet
+            .sheet(isPresented: $showMoreCategories) {
+                MoreCategoriesSheet(
+                    excluded: topCategories,
+                    onSelect: { category in
+                        showMoreCategories = false
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            pushCategory = category
+                        }
+                    }
+                )
+                .environmentObject(lang)
+            }
         }
     }
 }
@@ -55,10 +88,20 @@ private extension MapScreen {
     func L(_ ar: String, _ en: String) -> String {
         lang.isArabic ? ar : en
     }
+
+    func localizedCategoryName(_ category: PlaceCategory) -> String {
+        switch category {
+        case .restaurant: return L("مطاعم", "Restaurants")
+        case .foodTruck:  return L("فود ترك", "Food Trucks")
+        case .market:     return L("أسواق", "Markets")
+        case .mosque:     return L("مساجد", "Mosques")
+        default:
+            return category.displayName
+        }
+    }
 }
 
-// MARK: - Header / Search / Categories / Map / Results
-
+// MARK: - Header / Search / Top Categories / Map / Results
 private extension MapScreen {
 
     // هيدر بهوية إسلامية بسيطة (هلال + سطر تعريفي)
@@ -120,82 +163,57 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // ✅ زر "التصنيفات" + صف الكاتيجوري تحتها
-    var categoryFilters: some View {
-        VStack(spacing: 6) {
+    // ✅ Top Category Bar (4 + More)
+    var topCategoryBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
 
-            // زر واحد للتصنيفات
-            Button {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                    showCategoriesRow.toggle()
-                }
-            } label: {
-                HStack {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                        .imageScale(.medium)
-
-                    Text(L("التصنيفات", "Categories"))
-                        .font(.subheadline.weight(.semibold))
-
-                    Spacer()
-
-                    Image(systemName: showCategoriesRow ? "chevron.up" : "chevron.down")
-                        .imageScale(.small)
-                }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(
-                    Capsule()
-                        .fill(Color(.systemGray6))
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(Color(.systemGray3), lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
-            .padding(.horizontal)
-
-            // صف الكاتيجوري يظهر فقط عند الفتح
-            if showCategoriesRow {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(PlaceCategory.allCases) { category in
-                            Button {
-                                if selectedCategory == category {
-                                    selectedCategory = nil
-                                    viewModel.searchNearby(category: nil)
-                                } else {
-                                    selectedCategory = category
-                                    viewModel.searchNearby(category: category)
-                                }
-                                viewModel.filterBySearch(text: searchText)
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Text(category.displayName)
-                                        .font(.subheadline)
-                                }
-                                .padding(.vertical, 6)
-                                .padding(.horizontal, 12)
-                                .background(
-                                    (selectedCategory == category)
-                                    ? category.mapColor.opacity(0.25)
-                                    : Color(.systemGray6)
-                                )
-                                .foregroundColor(
-                                    (selectedCategory == category)
-                                    ? .primary
-                                    : .secondary
-                                )
-                                .cornerRadius(10)
-                            }
+                ForEach(topCategories) { category in
+                    Button {
+                        pushCategory = category
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text(category.emoji)
+                            Text(localizedCategoryName(category))
+                                .font(.subheadline.weight(.semibold))
                         }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.systemGray6))
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(.systemGray3), lineWidth: 1)
+                        )
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 4)
+                    .buttonStyle(.plain)
                 }
-                .transition(.opacity.combined(with: .move(edge: .top)))
+
+                // More
+                Button {
+                    showMoreCategories = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "ellipsis.circle.fill")
+                        Text(L("المزيد", "More"))
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(.systemGray6))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color(.systemGray3), lineWidth: 1)
+                    )
+                }
+                .buttonStyle(.plain)
             }
+            .padding(.horizontal)
         }
     }
 
@@ -218,7 +236,7 @@ private extension MapScreen {
                 }
             }
         }
-        .frame(height: 280) // أكبر من قبل عشان الماب تبان أكثر
+        .frame(height: 280)
         .cornerRadius(16)
         .padding(.horizontal)
     }
@@ -242,8 +260,7 @@ private extension MapScreen {
     }
 }
 
-// MARK: - ADS / PRIME SECTIONS (بشكل خفيف)
-
+// MARK: - ADS / PRIME SECTIONS
 private extension MapScreen {
 
     // 🔺 إعلان Prime كبير أعلى الصفحة – بألوان إسلامية
@@ -275,15 +292,14 @@ private extension MapScreen {
                 )
                 smallPrimeBanner(
                     icon: "cart.fill",
-                    title: L("محلات التموين", "Groceries"),
-                    subtitle: L("منتجات حلال طازجة", "Fresh halal products")
+                    title: L("أسواق حلال", "Halal Markets"),
+                    subtitle: L("لحوم وبقالات ومواد تموين", "Meat, groceries & more")
                 )
             }
             .padding(.vertical, 4)
         }
     }
 
-    // مكوّن إعلان Prime كبير – بألوان إسلامية
     func bigPrimeBanner(
         titleEN: String,
         titleAR: String,
@@ -298,7 +314,6 @@ private extension MapScreen {
         let tagText = L(tagTextAR, tagTextEN)
 
         return ZStack {
-            // Gradient إسلامي: أخضر غامق → تركواز
             LinearGradient(
                 colors: [
                     Color(red: 0.02, green: 0.30, blue: 0.23),
@@ -313,23 +328,14 @@ private extension MapScreen {
                 .blendMode(.overlay)
 
             HStack(spacing: 14) {
-                if let logoName = logoName, !logoName.isEmpty {
-                    Image(logoName)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 52, height: 52)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                        .shadow(radius: 4)
-                } else {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(Color.black.opacity(0.2))
-                        Image(systemName: "moon.stars.fill")
-                            .font(.title3)
-                            .foregroundColor(.white)
-                    }
-                    .frame(width: 52, height: 52)
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(Color.black.opacity(0.2))
+                    Image(systemName: "moon.stars.fill")
+                        .font(.title3)
+                        .foregroundColor(.white)
                 }
+                .frame(width: 52, height: 52)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
@@ -360,7 +366,6 @@ private extension MapScreen {
         .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
     }
 
-    // مكوّن البانر الصغير (Prime box) لشريط الكاروسيل
     func smallPrimeBanner(icon: String, title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
@@ -381,7 +386,7 @@ private extension MapScreen {
                 .foregroundColor(Color(red: 0.0, green: 0.55, blue: 0.45))
         }
         .padding(10)
-        .frame(width: 180, alignment: .leading) // عرض ثابت عشان يتحرك بالشريط
+        .frame(width: 180, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 14)
                 .fill(Color(.systemGray6))
