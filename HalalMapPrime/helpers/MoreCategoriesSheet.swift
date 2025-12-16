@@ -24,11 +24,31 @@ struct MoreCategoriesSheet: View {
         case .service:    return L("خدمات", "Services")
         case .center:     return L("مراكز", "Centers")
         case .funeral:    return L("مغاسل/دفن", "Funeral")
+
+        // MARK: - Women
+        case .womenSalon:  return L("صالون سيدات", "Women Salon")
+        case .womenGym:    return L("نادي/جيم سيدات", "Women Gym")
+        case .womenClinic: return L("عيادة نسائية", "Women Clinic")
         }
     }
 
+    // MARK: - Ordered Categories (Custom Order)
+    // المطلوب: Grocery, School, Service, Shop, Center, Women Salon, Women Gym, Women Clinic, Funeral (آخر شي)
     private var categories: [PlaceCategory] {
-        PlaceCategory.allCases.filter { !excluded.contains($0) }
+        let ordered: [PlaceCategory] = [
+            .grocery,
+            .school,
+            .service,
+            .shop,
+            .center,
+            .womenSalon,
+            .womenGym,
+            .womenClinic,
+            .funeral
+        ]
+
+        // نحافظ على excluded
+        return ordered.filter { !excluded.contains($0) }
     }
 
     var body: some View {

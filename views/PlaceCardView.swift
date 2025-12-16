@@ -31,7 +31,14 @@ struct PlaceCardView: View {
         case .shop:       return L("محل", "Shop")
         case .center:     return L("مركز", "Center")
         case .funeral:    return L("مغسلة/دفن", "Funeral")
-        }
+        case .womenSalon:
+            return L("صالون سيدات", "Women Salon")
+
+        case .womenGym:
+            return L("نادي سيدات", "Women Gym")
+
+        case .womenClinic:
+            return L("عيادة نسائية", "Women Clinic")        }
     }
 
     var body: some View {

@@ -3,60 +3,37 @@ import SwiftUI
 struct MainTabView: View {
 
     @EnvironmentObject var lang: LanguageManager
-    @State private var selectedTab: Int = 1
-
-    private var tintColor: Color {
-        switch selectedTab {
-        case 0: return .blue        // Add Location
-        case 2: return .teal        // Faith Tools
-        case 4: return .orange      // Paid Ads
-        default: return .green      // Map / Community
-        }
-    }
 
     var body: some View {
-        TabView(selection: $selectedTab) {
+        TabView {
 
-            // 0️⃣ Add Location (Blue)
-            AddStoreScreen()
-                .tag(0)
-                .tabItem {
-                    Image(systemName: "plus.circle.fill")
-                    Text(lang.isArabic ? "أضف عنوانك" : "Add Location")
-                }
-
-            // 1️⃣ Map (Center)
+            // ✅ Home (Yelp ads feed)
             MapScreen()
-                .tag(1)
+                .environmentObject(lang)
                 .tabItem {
-                    Image(systemName: "map.fill")
-                    Text(lang.isArabic ? "الخريطة" : "Map")
+                    Label(lang.isArabic ? "الرئيسية" : "Home", systemImage: "house.fill")
                 }
 
-            // 2️⃣ Faith Tools (NEW)
-            FaithToolsScreen()
-                .tag(2)
+            // ✅ Ads
+            AdsHomeView()
+                .environmentObject(lang)
                 .tabItem {
-                    Image(systemName: "moon.stars.fill")
-                    Text(lang.isArabic ? "أدوات الإيمان" : "Faith")
+                    Label(lang.isArabic ? "الإعلانات" : "Ads", systemImage: "megaphone.fill")
                 }
 
-            // 3️⃣ Community
+            // ✅ Community (الوظائف + الفعاليات + اللوحة + إضافة مكان)
             CommunityHubScreen()
-                .tag(3)
+                .environmentObject(lang)
                 .tabItem {
-                    Image(systemName: "person.3.fill")
-                    Text(lang.isArabic ? "الكميونتي" : "Community")
+                    Label(lang.isArabic ? "المجتمع" : "Community", systemImage: "person.3.fill")
                 }
 
-            // 4️⃣ Paid Ads (Orange) — ONLY Paid Ads entry point
-            AdsHomeScreen()
-                .tag(4)
+            // ✅ Faith (الصلاة/الدين)
+            FaithToolsScreen()
+                .environmentObject(lang)
                 .tabItem {
-                    Image(systemName: "megaphone.fill")
-                    Text(lang.isArabic ? "إعلانات مدفوعة" : "Paid Ads")
+                    Label(lang.isArabic ? "العبادة" : "Faith", systemImage: "moon.stars.fill")
                 }
         }
-        .tint(tintColor)
     }
 }

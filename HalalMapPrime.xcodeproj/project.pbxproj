@@ -13,7 +13,6 @@
 		151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E92EE528050065F10C /* AdsHomeScreen.swift */; };
 		151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */; };
 		151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */; };
-		151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* FreeAdFormView.swift */; };
 		151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F22EE597800065F10C /* MyAdsView.swift */; };
 		15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */; };
 		15777EA72EF0391B00C2B089 /* CategoryBrowseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */; };
@@ -53,7 +52,6 @@
 		151BD9E92EE528050065F10C /* AdsHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeScreen.swift; sourceTree = "<group>"; };
 		151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeView.swift; sourceTree = "<group>"; };
 		151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAdPlanView.swift; sourceTree = "<group>"; };
-		151BD9F02EE597570065F10C /* FreeAdFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeAdFormView.swift; sourceTree = "<group>"; };
 		151BD9F22EE597800065F10C /* MyAdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAdsView.swift; sourceTree = "<group>"; };
 		15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdComposerViewswift.swift; sourceTree = "<group>"; };
 		15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBrowseScreen.swift; sourceTree = "<group>"; };
@@ -122,7 +120,6 @@
 			children = (
 				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
 				151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */,
-				151BD9F02EE597570065F10C /* FreeAdFormView.swift */,
 				151BD9F22EE597800065F10C /* MyAdsView.swift */,
 				15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */,
 				15CEB1F52EE78A810035A83D /* EventAdsService.swift */,
@@ -310,7 +307,6 @@
 				15E1626F2EE121DC00A5C42C /* Place.swift in Sources */,
 				15A0D79C2EE060900063ED79 /* PlaceDetailView.swift in Sources */,
 				15E1624A2EE0D5D600A5C42C /* MapScreenViewModel.swift in Sources */,
-				151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */,
 				151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */,
 				15A0D79E2EE0626B0063ED79 /* AddStoreScreen.swift in Sources */,
 			);

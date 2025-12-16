@@ -2,57 +2,43 @@
 //  MapScreen.swift
 //  Halal Map Prime
 //
-//  Created by Zaid Nahleh on 2025-12-15.
-//  Copyright © 2025 Zaid Nahleh.
-//  All rights reserved.
+//  Home = Yelp-style Ads Feed (NO MAP)
+//  Search only (optional) + Categories row + Ads cards with images
 //
 
 import SwiftUI
-import MapKit
 
 struct MapScreen: View {
-    // MARK: - State / Environment
 
     @EnvironmentObject var lang: LanguageManager
     @StateObject private var viewModel = MapScreenViewModel()
 
+    @ObservedObject private var adsStore = AdsStore.shared
+
     @State private var searchText: String = ""
-    @State private var showResults: Bool = true
     @State private var selectedPlace: Place? = nil
 
-    // Navigation
     @State private var showMoreCategories: Bool = false
     @State private var pushCategory: PlaceCategory? = nil
 
-    // ✅ Top categories (4 فقط) — حسب خيار A
     private let topCategories: [PlaceCategory] = [.restaurant, .foodTruck, .market, .mosque]
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-
-                    // HEADER + SEARCH
                     header
                     searchBar
-
-                    // ✅ Top Categories (4 + More)
                     topCategoryBar
 
-                    // 🔺 إعلان Prime كبير أعلى الصفحة (إسلامي الهوية)
-                    topAdsSection
+                    // ✅ Sponsored + Trending (Yelp style)
+                    homeAdsSection
                         .padding(.horizontal)
 
-                    // 🗺 الخريطة
-                    mapView
-
-                    // 🔻 شريط متحرّك صغير لــ Prime Highlights
-                    primeHighlightsCarousel
-                        .padding(.horizontal)
-
-                    // قائمة النتائج
-                    if showResults {
+                    // ✅ Search results only when typing
+                    if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         resultsList
+                            .padding(.top, 6)
                     }
                 }
                 .padding(.bottom, 16)
@@ -61,12 +47,10 @@ struct MapScreen: View {
             .navigationDestination(item: $selectedPlace) { place in
                 PlaceDetailView(place: place)
             }
-            // ✅ صفحة الفئة (Reusable)
             .navigationDestination(item: $pushCategory) { category in
                 CategoryBrowseScreen(category: category)
                     .environmentObject(lang)
             }
-            // ✅ More Sheet
             .sheet(isPresented: $showMoreCategories) {
                 MoreCategoriesSheet(
                     excluded: topCategories,
@@ -83,11 +67,9 @@ struct MapScreen: View {
     }
 }
 
-// MARK: - Helper for localization
+// MARK: - Helpers
 private extension MapScreen {
-    func L(_ ar: String, _ en: String) -> String {
-        lang.isArabic ? ar : en
-    }
+    func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
     func localizedCategoryName(_ category: PlaceCategory) -> String {
         switch category {
@@ -101,10 +83,9 @@ private extension MapScreen {
     }
 }
 
-// MARK: - Header / Search / Top Categories / Map / Results
+// MARK: - Header / Search / Categories / Results
 private extension MapScreen {
 
-    // هيدر بهوية إسلامية بسيطة (هلال + سطر تعريفي)
     var header: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
@@ -117,16 +98,11 @@ private extension MapScreen {
                         .font(.title3.bold())
                 }
 
-                Text(
-                    L(
-                        "دليلك إلى كل ما هو حلال في مدينتك",
-                        "Your guide to everything halal in your city"
-                    )
-                )
+                Text(L("دليلك إلى كل ما هو حلال في مدينتك",
+                       "Your guide to everything halal in your city"))
                 .font(.footnote)
                 .foregroundColor(.secondary)
             }
-
             Spacer()
         }
         .padding(.horizontal)
@@ -137,10 +113,8 @@ private extension MapScreen {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
 
-            TextField(
-                L("ابحث عن مكان حلال…", "Search for a halal place…"),
-                text: $searchText
-            )
+            TextField(L("ابحث عن مكان حلال…", "Search for a halal place…"),
+                      text: $searchText)
             .textInputAutocapitalization(.never)
             .disableAutocorrection(true)
             .onChange(of: searchText) { newValue in
@@ -163,234 +137,243 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // ✅ Top Category Bar (4 + More)
     var topCategoryBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
 
-                ForEach(topCategories) { category in
-                    Button {
-                        pushCategory = category
-                    } label: {
+            HStack {
+                Text(L("التصنيفات", "Categories"))
+                    .font(.subheadline.bold())
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+
+                    ForEach(topCategories) { category in
+                        Button {
+                            // optional: load places for the category
+                            viewModel.searchNearby(category: category)
+                            pushCategory = category
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text(category.emoji)
+                                Text(localizedCategoryName(category))
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 12)
+                            .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray3), lineWidth: 1))
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    Button { showMoreCategories = true } label: {
                         HStack(spacing: 6) {
-                            Text(category.emoji)
-                            Text(localizedCategoryName(category))
+                            Image(systemName: "ellipsis.circle.fill")
+                            Text(L("المزيد", "More"))
                                 .font(.subheadline.weight(.semibold))
                         }
                         .padding(.vertical, 8)
                         .padding(.horizontal, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 12)
-                                .fill(Color(.systemGray6))
-                        )
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color(.systemGray3), lineWidth: 1)
-                        )
+                        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemGray6)))
+                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray3), lineWidth: 1))
                     }
                     .buttonStyle(.plain)
                 }
+                .padding(.horizontal)
+            }
+        }
+    }
 
-                // More
-                Button {
-                    showMoreCategories = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "ellipsis.circle.fill")
-                        Text(L("المزيد", "More"))
-                            .font(.subheadline.weight(.semibold))
+    var resultsList: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(L("نتائج البحث", "Search results"))
+                    .font(.headline)
+                Spacer()
+            }
+            .padding(.horizontal)
+
+            VStack(spacing: 0) {
+                ForEach(viewModel.filteredPlaces) { place in
+                    Button { selectedPlace = place } label: {
+                        PlaceRowView(place: place)
                     }
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(.systemGray6))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(Color(.systemGray3), lineWidth: 1)
-                    )
+                    Divider().padding(.leading, 16)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal)
         }
     }
-
-    var mapView: some View {
-        Map(
-            coordinateRegion: $viewModel.region,
-            annotationItems: viewModel.filteredPlaces
-        ) { place in
-            MapAnnotation(coordinate: place.coordinate) {
-                VStack(spacing: 2) {
-                    Text(place.category.emoji)
-                        .font(.system(size: 20))
-                    Circle()
-                        .fill(place.category.mapColor)
-                        .frame(width: 10, height: 10)
-                }
-                .onTapGesture {
-                    selectedPlace = place
-                    viewModel.focus(on: place)
-                }
-            }
-        }
-        .frame(height: 280)
-        .cornerRadius(16)
-        .padding(.horizontal)
-    }
-
-    /// قائمة النتائج بدون List عشان ما يصير تعارض Scroll
-    var resultsList: some View {
-        VStack(spacing: 0) {
-            ForEach(viewModel.filteredPlaces) { place in
-                Button {
-                    selectedPlace = place
-                    viewModel.focus(on: place)
-                } label: {
-                    PlaceRowView(place: place)
-                }
-
-                Divider()
-                    .padding(.leading, 16)
-            }
-        }
-        .padding(.horizontal)
-    }
 }
 
-// MARK: - ADS / PRIME SECTIONS
+// MARK: - HOME ADS (Sponsored + Trending)
 private extension MapScreen {
 
-    // 🔺 إعلان Prime كبير أعلى الصفحة – بألوان إسلامية
-    var topAdsSection: some View {
-        bigPrimeBanner(
-            titleEN: "Featured halal prime ad",
-            titleAR: "إعلان حلال مميز",
-            subtitleEN: "Top visibility for your halal business in NYC & NJ.",
-            subtitleAR: "أعلى ظهور لنشاطك الحلال في نيويورك ونيوجيرسي.",
-            tagTextEN: "PRIME • HALAL",
-            tagTextAR: "إعلان حلال • PRIME",
-            logoName: nil
-        )
+    private var activeAds: [Ad] { adsStore.activeAdsSorted() }
+
+    private var sponsoredAds: [Ad] {
+        activeAds.filter { $0.tier == .prime || $0.tier == .standard }
     }
 
-    // 🔻 شريط متحرك صغير أسفل الخريطة (Prime Highlights)
-    var primeHighlightsCarousel: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 10) {
-                smallPrimeBanner(
-                    icon: "fork.knife",
-                    title: L("مطاعم حلال", "Halal Restaurants"),
-                    subtitle: L("أفضل الخيارات القريبة", "Top nearby picks")
-                )
-                smallPrimeBanner(
-                    icon: "mappin.and.ellipse",
-                    title: L("مساجد / Masjid", "Mosques / Masjid"),
-                    subtitle: L("الصلاة والجمعة", "Prayer & Jumu’ah")
-                )
-                smallPrimeBanner(
-                    icon: "cart.fill",
-                    title: L("أسواق حلال", "Halal Markets"),
-                    subtitle: L("لحوم وبقالات ومواد تموين", "Meat, groceries & more")
-                )
+    private var trendingAds: [Ad] {
+        activeAds.filter { $0.tier == .free }
+    }
+
+    var homeAdsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+
+            // Sponsored
+            sectionTitle(L("Sponsored", "Sponsored"))
+            if sponsoredAds.isEmpty {
+                emptyBox(text: L("لا يوجد Sponsored بعد.", "No Sponsored ads yet."))
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(sponsoredAds) { ad in
+                        adButtonCard(ad)
+                    }
+                }
             }
-            .padding(.vertical, 4)
+
+            // Trending
+            sectionTitle(L("Trending", "Trending"))
+            if trendingAds.isEmpty {
+                emptyBox(text: L("لا يوجد Trending بعد.", "No Trending ads yet."))
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(trendingAds) { ad in
+                        adButtonCard(ad)
+                    }
+                }
+            }
+
+            // If no ads at all
+            if activeAds.isEmpty {
+                emptyBox(text: L("لا يوجد إعلانات بعد. افتح تبويب الإعلانات وأضف إعلان (1–3 صور) وسيظهر هنا.",
+                                 "No ads yet. Open Ads tab and add an ad (1–3 photos) and it will appear here."))
+            }
+        }
+        .padding(.top, 4)
+    }
+
+    func sectionTitle(_ title: String) -> some View {
+        HStack {
+            Text(title).font(.headline)
+            Spacer()
         }
     }
 
-    func bigPrimeBanner(
-        titleEN: String,
-        titleAR: String,
-        subtitleEN: String,
-        subtitleAR: String,
-        tagTextEN: String,
-        tagTextAR: String,
-        logoName: String?
-    ) -> some View {
-        let title = L(titleAR, titleEN)
-        let subtitle1 = L(subtitleAR, subtitleEN)
-        let tagText = L(tagTextAR, tagTextEN)
+    func emptyBox(text: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(text)
+                .font(.footnote)
+                .foregroundColor(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color(.systemGray6)))
+    }
 
-        return ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.02, green: 0.30, blue: 0.23),
-                    Color(red: 0.00, green: 0.55, blue: 0.50)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+    func adButtonCard(_ ad: Ad) -> some View {
+        Button {
+            if let place = viewModel.places.first(where: { $0.id == ad.placeId }) {
+                selectedPlace = place
+            }
+        } label: {
+            adCard(ad: ad)
+        }
+        .buttonStyle(.plain)
+    }
 
-            RoundedRectangle(cornerRadius: 22)
-                .strokeBorder(Color.white.opacity(0.22), lineWidth: 1)
-                .blendMode(.overlay)
+    func adCard(ad: Ad) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
 
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(Color.black.opacity(0.2))
-                    Image(systemName: "moon.stars.fill")
-                        .font(.title3)
-                        .foregroundColor(.white)
-                }
-                .frame(width: 52, height: 52)
+            adImagesCarousel(paths: ad.imagePaths)
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: 18))
 
+            HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(.headline)
-                        .foregroundColor(.white)
+                    if let place = viewModel.places.first(where: { $0.id == ad.placeId }) {
+                        Text(place.name)
+                            .font(.subheadline.bold())
+                            .lineLimit(1)
 
-                    Text(subtitle1)
-                        .font(.caption)
-                        .foregroundColor(.white.opacity(0.9))
-                        .lineLimit(2)
-
-                    Text(tagText)
-                        .font(.caption2.bold())
-                        .padding(.vertical, 4)
-                        .padding(.horizontal, 10)
-                        .background(Color.white.opacity(0.22))
-                        .foregroundColor(.white)
-                        .clipShape(Capsule())
-                        .padding(.top, 4)
+                        Text("\(place.category.emoji) \(localizedCategoryName(place.category))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text(L("إعلان", "Ad"))
+                            .font(.subheadline.bold())
+                        Text(ad.placeId)
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
                 }
 
                 Spacer()
+
+                Text(badgeText(for: ad.tier))
+                    .font(.caption2.bold())
+                    .padding(.vertical, 4)
+                    .padding(.horizontal, 10)
+                    .background(Color(.systemGray6))
+                    .clipShape(Capsule())
+                    .foregroundColor(.secondary)
             }
-            .padding(14)
         }
-        .frame(height: 120)
-        .cornerRadius(22)
-        .shadow(color: Color.black.opacity(0.18), radius: 8, x: 0, y: 4)
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 20).fill(Color(.systemBackground)))
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color(.systemGray5), lineWidth: 1))
+        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 4)
     }
 
-    func smallPrimeBanner(icon: String, title: String, subtitle: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.caption)
-                Text(title)
-                    .font(.subheadline.bold())
-            }
-            .foregroundColor(.primary)
-
-            Text(subtitle)
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .lineLimit(2)
-
-            Text(L("Prime • Halal", "Prime • Halal"))
-                .font(.caption2)
-                .foregroundColor(Color(red: 0.0, green: 0.55, blue: 0.45))
+    func badgeText(for tier: Ad.Tier) -> String {
+        switch tier {
+        case .prime:    return L("Prime", "Prime")
+        case .standard: return L("مدفوع", "Paid")
+        case .free:     return L("مجاني", "Free")
         }
-        .padding(10)
-        .frame(width: 180, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color(.systemGray6))
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 3, x: 0, y: 2)
+    }
+
+    func adImagesCarousel(paths: [String]) -> some View {
+        Group {
+            if paths.isEmpty {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+                    VStack(spacing: 6) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .font(.title2)
+                            .foregroundColor(.secondary)
+                        Text(L("صورة إعلان", "Ad image"))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else if paths.count == 1, let img = loadLocalImage(named: paths[0]) {
+                Image(uiImage: img).resizable().scaledToFill().clipped()
+            } else {
+                TabView {
+                    ForEach(Array(paths.prefix(3)), id: \.self) { name in
+                        if let img = loadLocalImage(named: name) {
+                            Image(uiImage: img).resizable().scaledToFill().clipped()
+                        } else {
+                            RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+                        }
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
+            }
+        }
+    }
+
+    func loadLocalImage(named filename: String) -> UIImage? {
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(filename)
+        return UIImage(contentsOfFile: url.path)
     }
 }

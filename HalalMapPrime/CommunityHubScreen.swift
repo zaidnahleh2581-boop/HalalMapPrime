@@ -160,16 +160,17 @@ private extension CommunityHubScreen {
         }
     }
 
-    /// قسم إضافة مسجد / محل / نشاط
+    /// قسم توثيق موقع/نشاط (Verified)
     var addPlaceSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L("شارك مكانك مع المجتمع", "Share your place with the community"))
+
+            Text(L("وثّق موقعك الحلال", "Verify your halal location"))
                 .font(.subheadline.bold())
 
             Text(
                 L(
-                    "أضف مسجدًا، مطعمًا حلالاً، محل بقالة أو أي نشاط يخدم المجتمع المسلم من حولك.",
-                    "Add a masjid, halal restaurant, grocery or any place that serves the Muslim community around you."
+                    "وثّق مطعمك أو محلك ليظهر كـ (Verified) على خريطة Halal Map Prime ويصل للمجتمع المسلم.",
+                    "Verify your restaurant or store to appear as (Verified) on Halal Map Prime map and reach the Muslim community."
                 )
             )
             .font(.caption)
@@ -179,23 +180,25 @@ private extension CommunityHubScreen {
                 showAddPlace = true
             } label: {
                 HStack(spacing: 10) {
-                    Image(systemName: "mappin.circle.fill")
+
+                    Image(systemName: "checkmark.seal.fill")
                         .font(.title3)
                         .foregroundColor(.white)
                         .padding(6)
                         .background(
                             Circle()
-                                .fill(Color(red: 0.00, green: 0.55, blue: 0.50))
+                                .fill(Color.blue)
                         )
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(L("إضافة مسجد / مطعم / محل حلال", "Add masjid / restaurant / halal store"))
+
+                        Text(L("وثّق مطعمك أو محلك كحلال", "Verify your restaurant or store"))
                             .font(.subheadline.bold())
 
                         Text(
                             L(
-                                "ساعد غيرك أن يجد الأماكن الحلال بسهولة على الخريطة.",
-                                "Help others easily find halal places on the map."
+                                "تقديم طلب توثيق (Verified) — مراجعة بسيطة قبل النشر.",
+                                "Submit a verification request (Verified) — quick review before publishing."
                             )
                         )
                         .font(.caption)
@@ -214,7 +217,6 @@ private extension CommunityHubScreen {
             .buttonStyle(.plain)
         }
     }
-
     /// قسم الميزات القادمة للمجتمع
     var comingSoonSection: some View {
         VStack(alignment: .leading, spacing: 10) {
