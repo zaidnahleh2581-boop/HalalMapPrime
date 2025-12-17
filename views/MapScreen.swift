@@ -4,7 +4,7 @@
 //
 //  Created by Zaid Nahleh
 //
-//  Home = Yelp-style Ads Feed (NO MAP)
+//
 //  Search only (optional) + Categories row + Ads cards with images
 //
 
@@ -63,6 +63,10 @@ struct MapScreen: View {
                     }
                 )
                 .environmentObject(lang)
+            }
+            // ✅ مهم: شغّل Listener للإعلانات
+            .onAppear {
+                adsStore.startActiveListener()
             }
         }
     }
@@ -213,7 +217,12 @@ private extension MapScreen {
 // MARK: - HOME ADS (Sponsored + Trending)
 private extension MapScreen {
 
-    private var activeAds: [Ad] { adsStore.activeAdsSorted() }
+    // ✅ FirebaseAd -> Ad (حتى لا نكسر UI)
+    private var activeAds: [Ad] {
+        adsStore.activeAds
+            .sorted { $0.createdAt > $1.createdAt }
+            .map { $0.toLocalAdFallback() }
+    }
 
     private var sponsoredAds: [Ad] {
         activeAds.filter { $0.tier == .prime || $0.tier == .standard }
@@ -226,7 +235,6 @@ private extension MapScreen {
     var homeAdsSection: some View {
         VStack(alignment: .leading, spacing: 14) {
 
-            // Sponsored
             sectionTitle(L("Sponsored", "Sponsored"))
             if sponsoredAds.isEmpty {
                 emptyBox(text: L("لا يوجد Sponsored بعد.", "No Sponsored ads yet."))
@@ -238,7 +246,6 @@ private extension MapScreen {
                 }
             }
 
-            // Trending
             sectionTitle(L("Trending", "Trending"))
             if trendingAds.isEmpty {
                 emptyBox(text: L("لا يوجد Trending بعد.", "No Trending ads yet."))
@@ -250,20 +257,18 @@ private extension MapScreen {
                 }
             }
 
-            // If no ads at all
             if activeAds.isEmpty {
-                emptyBox(text: L("لا يوجد إعلانات بعد. افتح تبويب الإعلانات وأضف إعلان (1–3 صور) وسيظهر هنا.",
-                                 "No ads yet. Open Ads tab and add an ad (1–3 photos) and it will appear here."))
+                emptyBox(text: L(
+                    "لا يوجد إعلانات بعد. افتح تبويب الإعلانات وأضف إعلان (1–3 صور) وسيظهر هنا.",
+                    "No ads yet. Open Ads tab and add an ad (1–3 photos) and it will appear here."
+                ))
             }
         }
         .padding(.top, 4)
     }
 
     func sectionTitle(_ title: String) -> some View {
-        HStack {
-            Text(title).font(.headline)
-            Spacer()
-        }
+        HStack { Text(title).font(.headline); Spacer() }
     }
 
     func emptyBox(text: String) -> some View {
@@ -279,7 +284,6 @@ private extension MapScreen {
 
     func adButtonCard(_ ad: Ad) -> some View {
         Button {
-            // ✅ FIX: placeId is optional
             if let pid = ad.placeId,
                let place = viewModel.places.first(where: { $0.id == pid }) {
                 selectedPlace = place
@@ -293,6 +297,7 @@ private extension MapScreen {
     func adCard(ad: Ad) -> some View {
         VStack(alignment: .leading, spacing: 10) {
 
+            // ✅ يدعم Local filenames أو URL
             adImagesCarousel(paths: ad.imagePaths)
                 .frame(height: 180)
                 .clipShape(RoundedRectangle(cornerRadius: 18))
@@ -300,7 +305,6 @@ private extension MapScreen {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
 
-                    // ✅ FIX: placeId optional + fallback text
                     if let pid = ad.placeId,
                        let place = viewModel.places.first(where: { $0.id == pid }) {
 
@@ -349,6 +353,7 @@ private extension MapScreen {
         }
     }
 
+    // ✅ Local filename OR URL
     func adImagesCarousel(paths: [String]) -> some View {
         Group {
             if paths.isEmpty {
@@ -363,16 +368,12 @@ private extension MapScreen {
                             .foregroundColor(.secondary)
                     }
                 }
-            } else if paths.count == 1, let img = loadLocalImage(named: paths[0]) {
-                Image(uiImage: img).resizable().scaledToFill().clipped()
+            } else if paths.count == 1 {
+                adImageView(from: paths[0])
             } else {
                 TabView {
-                    ForEach(Array(paths.prefix(3)), id: \.self) { name in
-                        if let img = loadLocalImage(named: name) {
-                            Image(uiImage: img).resizable().scaledToFill().clipped()
-                        } else {
-                            RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
-                        }
+                    ForEach(Array(paths.prefix(3)), id: \.self) { p in
+                        adImageView(from: p)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .automatic))
@@ -380,9 +381,68 @@ private extension MapScreen {
         }
     }
 
+    @ViewBuilder
+    func adImageView(from path: String) -> some View {
+        if let url = URL(string: path), url.scheme?.hasPrefix("http") == true {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image.resizable().scaledToFill().clipped()
+                case .failure:
+                    RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+                case .empty:
+                    RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+                @unknown default:
+                    RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+                }
+            }
+        } else if let img = loadLocalImage(named: path) {
+            Image(uiImage: img).resizable().scaledToFill().clipped()
+        } else {
+            RoundedRectangle(cornerRadius: 18).fill(Color(.systemGray5))
+        }
+    }
+
     func loadLocalImage(named filename: String) -> UIImage? {
         let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(filename)
         return UIImage(contentsOfFile: url.path)
+    }
+}
+
+// MARK: - FirebaseAd -> Ad Adapter (Fallback-safe)
+private extension FirebaseAd {
+    func toLocalAdFallback() -> Ad {
+
+        let tierEnum: Ad.Tier = {
+            switch tier.lowercased() {
+            case "prime": return .prime
+            case "standard": return .standard
+            default: return .free
+            }
+        }()
+
+        let statusEnum: Ad.Status = .active
+        // ✅ fallback values (حتى لو enums عندك مختلفة)
+        let bt: Ad.BusinessType = .restaurant
+        let tp: Ad.CopyTemplate = .simple
+
+        return Ad(
+            tier: tierEnum,
+            status: statusEnum,
+            placeId: placeId,
+            imagePaths: imageURLs,   // URLs أو filenames
+            businessName: businessName,
+            ownerName: ownerName,
+            phone: phone,
+            addressLine: addressLine,
+            city: city,
+            state: state,
+            businessType: bt,
+            template: tp,
+            createdAt: createdAt,
+            expiresAt: expiresAt ?? Date().addingTimeInterval(14 * 24 * 60 * 60),
+            freeCooldownKey: phone
+        )
     }
 }

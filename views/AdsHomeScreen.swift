@@ -11,16 +11,23 @@ struct AdsHomeScreen: View {
 
     @ObservedObject private var adsStore = AdsStore.shared
 
+    // ✅ FirebaseAd -> Ad (حتى تظل AdCard شغالة بدون تغيير كبير)
+    private var activeAds: [Ad] {
+        adsStore.activeAds
+            .sorted { $0.createdAt > $1.createdAt }
+            .map { $0.toLocalAdForUI() }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
 
-                    ForEach(adsStore.activeAdsSorted()) { ad in
+                    ForEach(activeAds) { ad in
                         AdCard(ad: ad)
                     }
 
-                    if adsStore.activeAdsSorted().isEmpty {
+                    if activeAds.isEmpty {
                         Text("No ads available")
                             .foregroundColor(.secondary)
                             .padding(.top, 40)
@@ -30,6 +37,9 @@ struct AdsHomeScreen: View {
             }
             .navigationTitle("Ads")
             .navigationBarTitleDisplayMode(.inline)
+            .onAppear {
+                adsStore.startActiveListener()
+            }
         }
     }
 }
@@ -77,25 +87,58 @@ private struct AdCard: View {
     }
 }
 
-// MARK: - Images Carousel
+// MARK: - Images Carousel (Local filename OR URL)
 
 private struct AdImagesCarousel: View {
 
     let paths: [String]
 
     var body: some View {
-        TabView {
-            ForEach(paths, id: \.self) { filename in
-                if let image = loadLocalImage(named: filename) {
-                    Image(uiImage: image)
+        Group {
+            if paths.isEmpty {
+                Color(.systemGray5)
+            } else if paths.count == 1 {
+                imageView(from: paths[0])
+            } else {
+                TabView {
+                    ForEach(paths.prefix(3), id: \.self) { p in
+                        imageView(from: p)
+                    }
+                }
+                .tabViewStyle(.page)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func imageView(from path: String) -> some View {
+        // ✅ URL from Firebase Storage
+        if let url = URL(string: path), url.scheme?.hasPrefix("http") == true {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .success(let image):
+                    image
                         .resizable()
                         .scaledToFill()
-                } else {
+                        .clipped()
+                case .failure:
+                    Color(.systemGray5)
+                case .empty:
+                    Color(.systemGray5)
+                @unknown default:
                     Color(.systemGray5)
                 }
             }
         }
-        .tabViewStyle(.page)
+        // ✅ Local filename (old)
+        else if let image = loadLocalImage(named: path) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFill()
+                .clipped()
+        } else {
+            Color(.systemGray5)
+        }
     }
 
     private func loadLocalImage(named filename: String) -> UIImage? {
@@ -104,5 +147,45 @@ private struct AdImagesCarousel: View {
             .appendingPathComponent(filename)
 
         return UIImage(contentsOfFile: url.path)
+    }
+}
+
+// MARK: - FirebaseAd -> Ad adapter (for UI)
+
+private extension FirebaseAd {
+    func toLocalAdForUI() -> Ad {
+
+        let tierEnum: Ad.Tier = {
+            switch tier.lowercased() {
+            case "prime": return .prime
+            case "standard": return .standard
+            default: return .free
+            }
+        }()
+
+        // ✅ حسب أخطائك السابقة: ما عندك .inactive
+        let statusEnum: Ad.Status = .active
+
+        // ✅ fallback enums (إذا عندك حالات مختلفة ابعتلي enum وسأضبطها)
+        let bt: Ad.BusinessType = .restaurant
+        let tp: Ad.CopyTemplate = .simple
+
+        return Ad(
+            tier: tierEnum,
+            status: statusEnum,
+            placeId: placeId,
+            imagePaths: imageURLs, // URLs (أو filenames القديمة)
+            businessName: businessName,
+            ownerName: ownerName,
+            phone: phone,
+            addressLine: addressLine,
+            city: city,
+            state: state,
+            businessType: bt,
+            template: tp,
+            createdAt: createdAt,
+            expiresAt: expiresAt ?? Date().addingTimeInterval(14 * 24 * 60 * 60),
+            freeCooldownKey: phone
+        )
     }
 }

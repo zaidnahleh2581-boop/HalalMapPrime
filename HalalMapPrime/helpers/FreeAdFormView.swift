@@ -8,14 +8,14 @@
 
 import SwiftUI
 import PhotosUI
+import FirebaseFirestore
+import FirebaseStorage
+import FirebaseAuth
 
 struct FreeAdFormView: View {
 
     @EnvironmentObject var lang: LanguageManager
     @Environment(\.dismiss) private var dismiss
-
-    // ✅ Store (Singleton)
-    @ObservedObject private var adsStore = AdsStore.shared
 
     // MARK: - Form fields
     @State private var businessName: String = ""
@@ -25,10 +25,12 @@ struct FreeAdFormView: View {
     @State private var city: String = ""
     @State private var state: String = ""
 
+    @State private var isPublishing = false
+
     @State private var businessType: Ad.BusinessType = .restaurant
     @State private var template: Ad.CopyTemplate = .simple
 
-    // Optional placeId (لو عندك Place.id لاحقاً)
+    // Optional placeId
     @State private var placeIdOptional: String = ""
 
     // Photos
@@ -162,6 +164,7 @@ struct FreeAdFormView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L("نشر", "Publish")) { saveFreeAd() }
+                        .disabled(isPublishing)
                 }
             }
             .alert(L("تم", "Saved"), isPresented: $showSavedAlert) {
@@ -172,9 +175,8 @@ struct FreeAdFormView: View {
         }
     }
 
-    // MARK: - Preview copy
+    // MARK: - Preview copy (يبقى محلي للعرض فقط)
     private func previewCopy() -> String {
-
         let bName = businessName.trimmingCharacters(in: .whitespacesAndNewlines)
         let oName = ownerName.trimmingCharacters(in: .whitespacesAndNewlines)
         let ph = phone.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -216,17 +218,17 @@ struct FreeAdFormView: View {
         }
     }
 
-    // MARK: - Save Free Ad
+    // MARK: - Save Free Ad (Firebase only)
     private func saveFreeAd() {
         errorMessage = nil
 
-        // Trim
         let bName = businessName.trimmingCharacters(in: .whitespacesAndNewlines)
         let oName = ownerName.trimmingCharacters(in: .whitespacesAndNewlines)
         let ph = phone.trimmingCharacters(in: .whitespacesAndNewlines)
         let addr = addressLine.trimmingCharacters(in: .whitespacesAndNewlines)
         let c = city.trimmingCharacters(in: .whitespacesAndNewlines)
         let st = state.trimmingCharacters(in: .whitespacesAndNewlines)
+        let pid = placeIdOptional.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !bName.isEmpty else { errorMessage = L("اسم المحل مطلوب.", "Business name is required."); return }
         guard !oName.isEmpty else { errorMessage = L("اسم صاحب المحل مطلوب.", "Owner name is required."); return }
@@ -240,62 +242,124 @@ struct FreeAdFormView: View {
             return
         }
 
-        // ✅ Monthly cooldown (by phone)
-        guard adsStore.canCreateFreeAd(cooldownKey: ph) else {
-            let days = adsStore.freeAdCooldownRemainingDays(cooldownKey: ph)
-            errorMessage = L("لا يمكنك نشر إعلان مجاني الآن. حاول بعد \(days) يوم.", "You can’t post a free ad now. Try again in \(days) days.")
+        guard let uid = Auth.auth().currentUser?.uid else {
+            errorMessage = L("لا يوجد مستخدم مسجّل دخول.", "No logged-in user.")
             return
         }
 
-        // Save images locally
-        let paths = pickedImages.compactMap { saveImageToDocuments($0) }
-        if paths.isEmpty {
-            errorMessage = L("تعذر حفظ الصور. جرّب مرة ثانية.", "Failed to save images. Try again.")
-            return
+        isPublishing = true
+
+        Task {
+            do {
+                let cooldown = try await canPostFreeAd(phone: ph)
+                if !cooldown.allowed {
+                    await MainActor.run {
+                        self.errorMessage = self.L(
+                            "لا يمكنك نشر إعلان مجاني الآن. حاول بعد \(cooldown.remainingDays) يوم.",
+                            "You can’t post a free ad now. Try again in \(cooldown.remainingDays) days."
+                        )
+                        self.isPublishing = false
+                    }
+                    return
+                }
+
+                let imageURLs = try await uploadImagesToFirebase(uid: uid, phone: ph, images: pickedImages)
+                let expires = Date().addingTimeInterval(14 * 24 * 60 * 60)
+
+                var adData: [String: Any] = [
+                    "tier": "free",
+                    "status": "active",
+                    "ownerId": uid,
+
+                    "businessName": bName,
+                    "ownerName": oName,
+                    "phone": ph,
+                    "addressLine": addr,
+                    "city": c,
+                    "state": st,
+
+                    "businessType": businessType.rawValue,
+                    "template": template.rawValue,
+
+                    "imageURLs": imageURLs,
+
+                    "createdAt": Timestamp(date: Date()),
+                    "expiresAt": Timestamp(date: expires),
+
+                    "isActive": true,
+                    "freeCooldownKey": ph
+                ]
+
+                if !pid.isEmpty {
+                    adData["placeId"] = pid
+                }
+
+                try await Firestore.firestore().collection("ads").addDocument(data: adData)
+
+                await MainActor.run {
+                    self.isPublishing = false
+                    self.showSavedAlert = true
+                }
+
+            } catch {
+                await MainActor.run {
+                    self.isPublishing = false
+                    self.errorMessage = self.L("حصل خطأ أثناء النشر: \(error.localizedDescription)",
+                                              "Publish failed: \(error.localizedDescription)")
+                }
+            }
         }
-
-        // 14 days expiration
-        let expires = Date().addingTimeInterval(14 * 24 * 60 * 60)
-
-        let pid = placeIdOptional.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        let ad = Ad(
-            tier: .free,
-            status: .active,
-            placeId: pid.isEmpty ? nil : pid,
-            imagePaths: paths,
-            businessName: bName,
-            ownerName: oName,
-            phone: ph,
-            addressLine: addr,
-            city: c,
-            state: st,
-            businessType: businessType,
-            template: template,
-            createdAt: Date(),
-            expiresAt: expires,
-            freeCooldownKey: ph
-        )
-
-        // ✅ المهم: استخدم adsStore (الآن صار يحفظ على Disk)
-        adsStore.add(ad)
-
-        showSavedAlert = true
     }
 
-    private func saveImageToDocuments(_ image: UIImage) -> String? {
-        guard let data = image.jpegData(compressionQuality: 0.82) else { return nil }
-        let filename = "ad_\(UUID().uuidString).jpg"
+    // MARK: - Cooldown
+    private struct CooldownResult {
+        let allowed: Bool
+        let remainingDays: Int
+    }
 
-        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(filename)
+    private func canPostFreeAd(phone: String) async throws -> CooldownResult {
+        let db = Firestore.firestore()
+        let now = Date()
+        let cutoff = now.addingTimeInterval(-30 * 24 * 60 * 60)
 
-        do {
-            try data.write(to: url, options: .atomic)
-            return filename
-        } catch {
-            print("❌ save image error:", error)
-            return nil
+        let snap = try await db.collection("ads")
+            .whereField("tier", isEqualTo: "free")
+            .whereField("freeCooldownKey", isEqualTo: phone)
+            .whereField("createdAt", isGreaterThan: Timestamp(date: cutoff))
+            .order(by: "createdAt", descending: true)
+            .limit(to: 1)
+            .getDocuments()
+
+        guard let doc = snap.documents.first,
+              let createdAt = (doc.data()["createdAt"] as? Timestamp)?.dateValue()
+        else {
+            return CooldownResult(allowed: true, remainingDays: 0)
         }
+
+        let daysPassed = Calendar.current.dateComponents([.day], from: createdAt, to: now).day ?? 0
+        let remaining = max(0, 30 - daysPassed)
+        return CooldownResult(allowed: remaining == 0, remainingDays: remaining)
+    }
+
+    // MARK: - Upload images to Firebase Storage
+    private func uploadImagesToFirebase(uid: String, phone: String, images: [UIImage]) async throws -> [String] {
+        let storage = Storage.storage()
+        let root = storage.reference().child("ads").child(uid).child(phone).child(UUID().uuidString)
+
+        var urls: [String] = []
+        urls.reserveCapacity(images.count)
+
+        for (index, img) in images.enumerated() {
+            guard let data = img.jpegData(compressionQuality: 0.82) else { continue }
+            let ref = root.child("img_\(index).jpg")
+            _ = try await ref.putDataAsync(data, metadata: nil)
+            let url = try await ref.downloadURL()
+            urls.append(url.absoluteString)
+        }
+
+        if urls.isEmpty {
+            throw NSError(domain: "Upload", code: 0, userInfo: [NSLocalizedDescriptionKey: "No images uploaded"])
+        }
+        return urls
     }
 }

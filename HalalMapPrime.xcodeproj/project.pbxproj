@@ -13,6 +13,7 @@
 		151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E92EE528050065F10C /* AdsHomeScreen.swift */; };
 		151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */; };
 		151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F22EE597800065F10C /* MyAdsView.swift */; };
+		1525A5BF2EF3015C0081DCB1 /* FirebaseAdsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1525A5BE2EF3015C0081DCB1 /* FirebaseAdsService.swift */; };
 		15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */; };
 		15777EA72EF0391B00C2B089 /* CategoryBrowseScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */; };
 		15777EAD2EF03CE400C2B089 /* PlaceCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15777EAC2EF03CE400C2B089 /* PlaceCardView.swift */; };
@@ -52,6 +53,7 @@
 		151BD9E92EE528050065F10C /* AdsHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeScreen.swift; sourceTree = "<group>"; };
 		151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAdPlanView.swift; sourceTree = "<group>"; };
 		151BD9F22EE597800065F10C /* MyAdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAdsView.swift; sourceTree = "<group>"; };
+		1525A5BE2EF3015C0081DCB1 /* FirebaseAdsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAdsService.swift; sourceTree = SOURCE_ROOT; };
 		15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdComposerViewswift.swift; sourceTree = "<group>"; };
 		15777EA62EF0391B00C2B089 /* CategoryBrowseScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryBrowseScreen.swift; sourceTree = "<group>"; };
 		15777EAC2EF03CE400C2B089 /* PlaceCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceCardView.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 			children = (
 				15E162472EE0D50500A5C42C /* GooglePlacesService.swift */,
 				15B48CF22EE1E50300A88AB7 /* GooglePlacesModelsswift.swift */,
+				1525A5BE2EF3015C0081DCB1 /* FirebaseAdsService.swift */,
 			);
 			path = services;
 			sourceTree = "<group>";
@@ -290,6 +293,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1525A5BF2EF3015C0081DCB1 /* FirebaseAdsService.swift in Sources */,
 				15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */,
 				151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */,
 				15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */,

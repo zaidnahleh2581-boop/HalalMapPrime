@@ -1,3 +1,11 @@
+//
+//  RootView.swift
+//  HalalMapPrime
+//
+//  Created by Zaid Nahleh
+//  Updated by Zaid Nahleh on 12/17/25
+//
+
 import SwiftUI
 
 struct RootView: View {
@@ -7,5 +15,8 @@ struct RootView: View {
     var body: some View {
         MainTabView()
             .environmentObject(lang)
+            .onAppear {
+                AuthManager.shared.ensureSignedIn()
+            }
     }
 }
