@@ -1,36 +1,41 @@
-//
-//  AdsStore.swift
-//  HalalMapPrime
-//
-//  Created by Zaid Nahleh on 12/16/25.
-//
-
 import Foundation
 import Combine
+import FirebaseFirestore
 
+@MainActor
 final class AdsStore: ObservableObject {
 
     static let shared = AdsStore()
 
     @Published private(set) var ads: [Ad] = []
 
-    private init() { }
+    private let db = Firestore.firestore()
+    private var listener: ListenerRegistration?
 
-    // MARK: - Public helpers
+    private init() {}
 
-    /// يرجّع فقط الإعلانات النشطة + غير المنتهية، مرتبة (Prime ثم Paid ثم Free) والأحدث أولاً
-    func activeAdsSorted() -> [Ad] {
-        expireAdsIfNeeded()
+    // MARK: - Firestore Listening
 
-        return ads
-            .filter { $0.status == .active && !$0.isExpired }
-            .sorted { a, b in
-                let ra = a.tier.priority
-                let rb = b.tier.priority
-                if ra != rb { return ra > rb }
-                return a.createdAt > b.createdAt
+    func startListeningAds() {
+        stopListening()
+
+        listener = db.collection("ads")
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self else { return }
+                if let docs = snapshot?.documents {
+                    self.ads = docs.compactMap { doc in
+                        try? doc.data(as: Ad.self)
+                    }
+                }
             }
     }
+
+    func stopListening() {
+        listener?.remove()
+        listener = nil
+    }
+
+    // MARK: - Local helpers (used by Views)
 
     func add(_ ad: Ad) {
         ads.insert(ad, at: 0)
@@ -40,38 +45,32 @@ final class AdsStore: ObservableObject {
         ads.removeAll { $0.id == adId }
     }
 
-    // MARK: - Expiration
+    // MARK: - Active Ads
 
-    private func expireAdsIfNeeded() {
-        var changed = false
-        for i in ads.indices {
-            if ads[i].status == .active, ads[i].isExpired {
-                ads[i].status = .expired
-                changed = true
+    func activeAdsSorted() -> [Ad] {
+        ads
+            .filter { $0.status == .active && !$0.isExpired }
+            .sorted {
+                if $0.tier.priority != $1.tier.priority {
+                    return $0.tier.priority > $1.tier.priority
+                }
+                return $0.createdAt > $1.createdAt
             }
-        }
-        if changed {
-            objectWillChange.send()
-        }
     }
 
-    // MARK: - Free Ad monthly cooldown
+    // MARK: - Free Ad cooldown logic
 
-    /// يمنع Free Ad أكثر من مرة بالشهر لنفس "المالك" (نستخدم phone كـ key)
     func canCreateFreeAd(cooldownKey: String) -> Bool {
-        // آخر Free Ad لهذا الرقم
         guard let last = ads
             .filter({ $0.tier == .free && $0.freeCooldownKey == cooldownKey })
             .sorted(by: { $0.createdAt > $1.createdAt })
             .first
         else { return true }
 
-        // 30 يوم
         let days30: TimeInterval = 30 * 24 * 60 * 60
         return Date().timeIntervalSince(last.createdAt) >= days30
     }
 
-    /// الوقت المتبقي حتى يسمح Free Ad جديد
     func freeAdCooldownRemainingDays(cooldownKey: String) -> Int {
         guard let last = ads
             .filter({ $0.tier == .free && $0.freeCooldownKey == cooldownKey })
@@ -80,8 +79,7 @@ final class AdsStore: ObservableObject {
         else { return 0 }
 
         let days30: TimeInterval = 30 * 24 * 60 * 60
-        let elapsed = Date().timeIntervalSince(last.createdAt)
-        let remaining = max(0, days30 - elapsed)
+        let remaining = max(0, days30 - Date().timeIntervalSince(last.createdAt))
         return Int(ceil(remaining / (24 * 60 * 60)))
     }
 }

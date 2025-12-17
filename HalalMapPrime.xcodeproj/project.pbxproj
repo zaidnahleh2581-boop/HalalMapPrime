@@ -128,6 +128,13 @@
 			path = ADS;
 			sourceTree = "<group>";
 		};
+		159D533B2EF2621000F3BB60 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		15A0D76A2EE055040063ED79 = {
 			isa = PBXGroup;
 			children = (
@@ -138,6 +145,7 @@
 				15A0D7822EE059C90063ED79 /* viewmodels */,
 				15A0D7812EE059A10063ED79 /* views */,
 				15A0D7752EE055040063ED79 /* HalalMapPrime */,
+				159D533B2EF2621000F3BB60 /* Frameworks */,
 				15A0D7742EE055040063ED79 /* Products */,
 			);
 			sourceTree = "<group>";
