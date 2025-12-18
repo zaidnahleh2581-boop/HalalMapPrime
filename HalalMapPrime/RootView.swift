@@ -16,7 +16,9 @@ struct RootView: View {
         MainTabView()
             .environmentObject(lang)
             .onAppear {
-                AuthManager.shared.ensureSignedIn()
+                Task {
+                    try? await AuthManager.shared.ensureSignedIn()
+                }
             }
     }
 }

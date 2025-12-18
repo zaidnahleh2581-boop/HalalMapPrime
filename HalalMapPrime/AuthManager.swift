@@ -13,17 +13,27 @@ final class AuthManager {
     static let shared = AuthManager()
     private init() {}
 
-    func ensureSignedIn() {
+    /// ✅ Guaranteed user (anonymous) before any Firestore/Storage write
+    func ensureSignedIn() async throws -> String {
         if let user = Auth.auth().currentUser {
-            print("✅ Already signed in:", user.uid)
-            return
+            return user.uid
         }
 
-        Auth.auth().signInAnonymously { result, error in
-            if let error = error {
-                print("❌ Anonymous sign-in failed:", error.localizedDescription)
-            } else {
-                print("✅ Signed in anonymously:", result?.user.uid ?? "")
+        return try await withCheckedThrowingContinuation { cont in
+            Auth.auth().signInAnonymously { result, error in
+                if let error = error {
+                    cont.resume(throwing: error)
+                    return
+                }
+                if let uid = result?.user.uid {
+                    cont.resume(returning: uid)
+                    return
+                }
+                cont.resume(throwing: NSError(
+                    domain: "AuthManager",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "No user returned from signInAnonymously"]
+                ))
             }
         }
     }

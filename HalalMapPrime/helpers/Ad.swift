@@ -6,19 +6,12 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Ad: Identifiable, Hashable, Codable {
 
     enum Tier: String, Codable {
         case free, standard, prime
-
-        var priority: Int {
-            switch self {
-            case .free: return 0
-            case .standard: return 1
-            case .prime: return 2
-            }
-        }
     }
 
     enum Status: String, Codable {
@@ -26,16 +19,7 @@ struct Ad: Identifiable, Hashable, Codable {
     }
 
     enum BusinessType: String, Codable, CaseIterable, Identifiable {
-        case restaurant
-        case grocery
-        case butcher
-        case deli
-        case bakery
-        case cafe
-        case foodTruck
-        case market
-        case other
-
+        case restaurant, grocery, butcher, deli, bakery, cafe, foodTruck, market, other
         var id: String { rawValue }
 
         var titleEN: String {
@@ -68,11 +52,7 @@ struct Ad: Identifiable, Hashable, Codable {
     }
 
     enum CopyTemplate: String, Codable, CaseIterable, Identifiable {
-        case simple
-        case halalVerifiedStyle
-        case familyFriendly
-        case newOpening
-
+        case simple, halalVerifiedStyle, familyFriendly, newOpening
         var id: String { rawValue }
 
         var titleEN: String {
@@ -99,13 +79,13 @@ struct Ad: Identifiable, Hashable, Codable {
     let tier: Tier
     var status: Status
 
-    // MARK: - Linking (optional for v1)
-    var placeId: String?        // لو موجود يفتح PlaceDetail
+    // optional linking
+    var placeId: String?
 
-    // MARK: - Media
-    let imagePaths: [String]    // local filenames (Documents)
+    // local filenames (optional use)
+    let imagePaths: [String]
 
-    // MARK: - Business info (required for Free Ads)
+    // business info
     let businessName: String
     let ownerName: String
     let phone: String
@@ -114,13 +94,13 @@ struct Ad: Identifiable, Hashable, Codable {
     let state: String
     let businessType: BusinessType
 
-    // MARK: - Copy (auto-generated)
+    // template
     let template: CopyTemplate
 
-    // MARK: - Duration / Cooldown
+    // duration/cooldown
     let createdAt: Date
-    let expiresAt: Date         // 14 days
-    let freeCooldownKey: String // نستخدمه لمنع Free Ad أكثر من مرة بالشهر (مثل phone)
+    let expiresAt: Date
+    let freeCooldownKey: String
 
     init(
         id: String = UUID().uuidString,
@@ -145,7 +125,6 @@ struct Ad: Identifiable, Hashable, Codable {
         self.status = status
         self.placeId = placeId
         self.imagePaths = Array(imagePaths.prefix(3))
-
         self.businessName = businessName
         self.ownerName = ownerName
         self.phone = phone
@@ -154,15 +133,14 @@ struct Ad: Identifiable, Hashable, Codable {
         self.state = state
         self.businessType = businessType
         self.template = template
-
         self.createdAt = createdAt
         self.expiresAt = expiresAt
         self.freeCooldownKey = freeCooldownKey
     }
 
-    // MARK: - Computed
     var isExpired: Bool { Date() >= expiresAt }
 
+    /// ✅ system-generated only (no free user text)
     func generatedCopy(isArabic: Bool) -> String {
         let type = isArabic ? businessType.titleAR : businessType.titleEN
         let location = "\(city), \(state)".trimmingCharacters(in: .whitespacesAndNewlines)
@@ -188,84 +166,5 @@ struct Ad: Identifiable, Hashable, Codable {
             ? "افتتاح/تجديد \(businessName)! \(type) في \(location). زورونا: \(addressLine)."
             : "New (re)opening: \(businessName)! \(type) in \(location). Visit us at \(addressLine)."
         }
-    }
-}
-import FirebaseFirestore
-
-extension Ad {
-
-    func toFirestore() -> [String: Any] {
-        return [
-            "tier": tier.rawValue,
-            "status": status.rawValue,
-            "placeId": placeId as Any,
-            "imagePaths": imagePaths,
-
-            "businessName": businessName,
-            "ownerName": ownerName,
-            "phone": phone,
-            "addressLine": addressLine,
-            "city": city,
-            "state": state,
-            "businessType": businessType.rawValue,
-
-            "template": template.rawValue,
-
-            "createdAt": Timestamp(date: createdAt),
-            "expiresAt": Timestamp(date: expiresAt),
-            "freeCooldownKey": freeCooldownKey
-        ]
-    }
-
-    static func fromFirestore(id: String, data: [String: Any]) -> Ad? {
-        guard
-            let tierStr = data["tier"] as? String,
-            let tier = Tier(rawValue: tierStr),
-            let statusStr = data["status"] as? String,
-            let status = Status(rawValue: statusStr),
-
-            let imagePaths = data["imagePaths"] as? [String],
-
-            let businessName = data["businessName"] as? String,
-            let ownerName = data["ownerName"] as? String,
-            let phone = data["phone"] as? String,
-            let addressLine = data["addressLine"] as? String,
-            let city = data["city"] as? String,
-            let state = data["state"] as? String,
-
-            let businessTypeStr = data["businessType"] as? String,
-            let businessType = BusinessType(rawValue: businessTypeStr),
-
-            let templateStr = data["template"] as? String,
-            let template = CopyTemplate(rawValue: templateStr),
-
-            let createdAtTS = data["createdAt"] as? Timestamp,
-            let expiresAtTS = data["expiresAt"] as? Timestamp,
-
-            let freeCooldownKey = data["freeCooldownKey"] as? String
-        else {
-            return nil
-        }
-
-        let placeId = data["placeId"] as? String
-
-        return Ad(
-            id: id,
-            tier: tier,
-            status: status,
-            placeId: placeId,
-            imagePaths: imagePaths,
-            businessName: businessName,
-            ownerName: ownerName,
-            phone: phone,
-            addressLine: addressLine,
-            city: city,
-            state: state,
-            businessType: businessType,
-            template: template,
-            createdAt: createdAtTS.dateValue(),
-            expiresAt: expiresAtTS.dateValue(),
-            freeCooldownKey: freeCooldownKey
-        )
     }
 }

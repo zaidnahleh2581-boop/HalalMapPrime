@@ -16,7 +16,7 @@ struct HalalMapPrimeApp: App {
 
     init() {
         FirebaseApp.configure()
-        AuthManager.shared.ensureSignedIn()   // ✅ هذا هو الحل
+        // ❌ لا تسجيل دخول هنا
     }
 
     var body: some Scene {

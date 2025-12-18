@@ -10,7 +10,6 @@ import SwiftUI
 import PhotosUI
 import FirebaseFirestore
 import FirebaseStorage
-import FirebaseAuth
 
 struct FreeAdFormView: View {
 
@@ -30,7 +29,7 @@ struct FreeAdFormView: View {
     @State private var businessType: Ad.BusinessType = .restaurant
     @State private var template: Ad.CopyTemplate = .simple
 
-    // Optional placeId
+    // ✅ Optional placeId
     @State private var placeIdOptional: String = ""
 
     // Photos
@@ -79,7 +78,7 @@ struct FreeAdFormView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(L("معاينة النص", "Copy preview"))
+                        Text(L("معاينة النص (من النظام)", "Copy preview (system-generated)"))
                             .font(.footnote.bold())
                         Text(previewCopy())
                             .font(.footnote)
@@ -117,6 +116,7 @@ struct FreeAdFormView: View {
                                         .resizable()
                                         .scaledToFill()
                                         .frame(width: 120, height: 90)
+                                        .clipped()
                                         .clipShape(RoundedRectangle(cornerRadius: 12))
                                 }
                             }
@@ -163,7 +163,7 @@ struct FreeAdFormView: View {
                     Button(L("إغلاق", "Close")) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L("نشر", "Publish")) { saveFreeAd() }
+                    Button(L("نشر", "Publish")) { publish() }
                         .disabled(isPublishing)
                 }
             }
@@ -175,7 +175,7 @@ struct FreeAdFormView: View {
         }
     }
 
-    // MARK: - Preview copy (يبقى محلي للعرض فقط)
+    // MARK: - Preview copy (system generated only)
     private func previewCopy() -> String {
         let bName = businessName.trimmingCharacters(in: .whitespacesAndNewlines)
         let oName = ownerName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -205,21 +205,28 @@ struct FreeAdFormView: View {
         return temp.generatedCopy(isArabic: lang.isArabic)
     }
 
-    // MARK: - Load images
+    // MARK: - Load images ✅ (fix: always in scope)
     private func loadImages(from items: [PhotosPickerItem]) async {
-        pickedImages.removeAll()
-        errorMessage = nil
+        await MainActor.run {
+            pickedImages.removeAll()
+            errorMessage = nil
+        }
 
+        var imgs: [UIImage] = []
         for item in items.prefix(3) {
             if let data = try? await item.loadTransferable(type: Data.self),
                let img = UIImage(data: data) {
-                pickedImages.append(img)
+                imgs.append(img)
             }
+        }
+
+        await MainActor.run {
+            pickedImages = imgs
         }
     }
 
-    // MARK: - Save Free Ad (Firebase only)
-    private func saveFreeAd() {
+    // MARK: - Publish
+    private func publish() {
         errorMessage = nil
 
         let bName = businessName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -242,15 +249,14 @@ struct FreeAdFormView: View {
             return
         }
 
-        guard let uid = Auth.auth().currentUser?.uid else {
-            errorMessage = L("لا يوجد مستخدم مسجّل دخول.", "No logged-in user.")
-            return
-        }
-
         isPublishing = true
 
         Task {
             do {
+                // ✅ guarantee login HERE (fixes No logged-in user)
+                let uid = try await AuthManager.shared.ensureSignedIn()
+
+                // ✅ cooldown check (monthly)
                 let cooldown = try await canPostFreeAd(phone: ph)
                 if !cooldown.allowed {
                     await MainActor.run {
@@ -263,7 +269,10 @@ struct FreeAdFormView: View {
                     return
                 }
 
+                // ✅ upload images
                 let imageURLs = try await uploadImagesToFirebase(uid: uid, phone: ph, images: pickedImages)
+
+                // ✅ firestore doc
                 let expires = Date().addingTimeInterval(14 * 24 * 60 * 60)
 
                 var adData: [String: Any] = [
@@ -304,8 +313,10 @@ struct FreeAdFormView: View {
             } catch {
                 await MainActor.run {
                     self.isPublishing = false
-                    self.errorMessage = self.L("حصل خطأ أثناء النشر: \(error.localizedDescription)",
-                                              "Publish failed: \(error.localizedDescription)")
+                    self.errorMessage = self.L(
+                        "حصل خطأ أثناء النشر: \(error.localizedDescription)",
+                        "Publish failed: \(error.localizedDescription)"
+                    )
                 }
             }
         }
