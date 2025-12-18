@@ -189,7 +189,7 @@ struct FreeAdFormView: View {
             freeCooldownKey: ph.isEmpty ? "temp" : ph
         )
 
-        return temp.generatedCopy(isArabic: lang.isArabic)
+        return AdCopyLibrary.generate(ad: temp, isArabic: lang.isArabic)
     }
 
     private func loadImages(from items: [PhotosPickerItem]) async {

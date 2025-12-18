@@ -3,6 +3,7 @@
 //  HalalMapPrime
 //
 //  Created by Zaid Nahleh on 12/16/25.
+//  Updated by Zaid Nahleh on 12/18/25.
 //
 
 import Foundation
@@ -10,15 +11,15 @@ import FirebaseFirestore
 
 struct Ad: Identifiable, Hashable, Codable {
 
-    enum Tier: String, Codable {
+    enum Tier: String, Codable, Hashable {
         case free, standard, prime
     }
 
-    enum Status: String, Codable {
+    enum Status: String, Codable, Hashable {
         case pending, active, paused, expired
     }
 
-    enum BusinessType: String, Codable, CaseIterable, Identifiable {
+    enum BusinessType: String, Codable, CaseIterable, Identifiable, Hashable {
         case restaurant, grocery, butcher, deli, bakery, cafe, foodTruck, market, other
         var id: String { rawValue }
 
@@ -51,25 +52,63 @@ struct Ad: Identifiable, Hashable, Codable {
         }
     }
 
-    enum CopyTemplate: String, Codable, CaseIterable, Identifiable {
-        case simple, halalVerifiedStyle, familyFriendly, newOpening
+    /// ✅ 15 templates (ONLY defined here)
+    enum CopyTemplate: String, Codable, CaseIterable, Identifiable, Hashable {
+        case simple
+        case halalFocused
+        case familyFriendly
+        case newOpening
+        case communitySupport
+        case popular
+        case deliveryOrCall
+        case locationHighlight
+        case bestTimeToVisit
+        case specialOfferStyle
+        case fridaySpecial
+        case weekend
+        case easyParking
+        case accessible
+        case contactNow
+
         var id: String { rawValue }
 
         var titleEN: String {
             switch self {
             case .simple: return "Simple"
-            case .halalVerifiedStyle: return "Halal-focused"
+            case .halalFocused: return "Halal-focused"
             case .familyFriendly: return "Family friendly"
             case .newOpening: return "New opening"
+            case .communitySupport: return "Community support"
+            case .popular: return "Popular spot"
+            case .deliveryOrCall: return "Call / Delivery"
+            case .locationHighlight: return "Location highlight"
+            case .bestTimeToVisit: return "Best time to visit"
+            case .specialOfferStyle: return "Special offer style"
+            case .fridaySpecial: return "Friday highlight"
+            case .weekend: return "Weekend"
+            case .easyParking: return "Easy parking"
+            case .accessible: return "Accessibility"
+            case .contactNow: return "Contact now"
             }
         }
 
         var titleAR: String {
             switch self {
             case .simple: return "بسيط"
-            case .halalVerifiedStyle: return "حلال (تركيز)"
+            case .halalFocused: return "حلال (تركيز)"
             case .familyFriendly: return "مناسب للعائلة"
             case .newOpening: return "افتتاح جديد"
+            case .communitySupport: return "دعم المجتمع"
+            case .popular: return "مميز/مشهور"
+            case .deliveryOrCall: return "اتصال/توصيل"
+            case .locationHighlight: return "موقع مميز"
+            case .bestTimeToVisit: return "أفضل وقت للزيارة"
+            case .specialOfferStyle: return "عرض/ميزة"
+            case .fridaySpecial: return "ميزة الجمعة"
+            case .weekend: return "الويكند"
+            case .easyParking: return "مواقف سهلة"
+            case .accessible: return "سهولة الوصول"
+            case .contactNow: return "تواصل الآن"
             }
         }
     }
@@ -139,32 +178,4 @@ struct Ad: Identifiable, Hashable, Codable {
     }
 
     var isExpired: Bool { Date() >= expiresAt }
-
-    /// ✅ system-generated only (no free user text)
-    func generatedCopy(isArabic: Bool) -> String {
-        let type = isArabic ? businessType.titleAR : businessType.titleEN
-        let location = "\(city), \(state)".trimmingCharacters(in: .whitespacesAndNewlines)
-
-        switch template {
-        case .simple:
-            return isArabic
-            ? "زوروا \(businessName) (\(type)) في \(location). للتواصل: \(phone)."
-            : "Visit \(businessName) (\(type)) in \(location). Contact: \(phone)."
-
-        case .halalVerifiedStyle:
-            return isArabic
-            ? "\(businessName) — \(type) حلال لخدمة المجتمع. العنوان: \(addressLine), \(location). هاتف: \(phone)."
-            : "\(businessName) — a halal-focused \(type) serving the community. Address: \(addressLine), \(location). Phone: \(phone)."
-
-        case .familyFriendly:
-            return isArabic
-            ? "\(businessName) (\(type)) مناسب للعائلات. موقعنا: \(addressLine), \(location). اتصل: \(phone)."
-            : "\(businessName) (\(type)) family-friendly. We’re at \(addressLine), \(location). Call: \(phone)."
-
-        case .newOpening:
-            return isArabic
-            ? "افتتاح/تجديد \(businessName)! \(type) في \(location). زورونا: \(addressLine)."
-            : "New (re)opening: \(businessName)! \(type) in \(location). Visit us at \(addressLine)."
-        }
-    }
 }

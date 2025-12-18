@@ -3,11 +3,10 @@
 //  HalalMapPrime
 //
 //  Created by Zaid Nahleh
-//  Updated by Zaid Nahleh on 12/17/25
+//  Updated by Zaid Nahleh on 12/18/25
 //
 
 import Foundation
-import Combine
 
 enum AdCopyLibrary {
 
@@ -17,10 +16,9 @@ enum AdCopyLibrary {
             businessType: ad.businessType,
             template: ad.template,
             isArabic: isArabic,
-            stableKey: ad.businessName + ad.phone + ad.city + ad.state
+            stableKey: ad.businessName + "|" + ad.phone + "|" + ad.city + "|" + ad.state
         )
 
-        // Fill placeholders safely
         let type = isArabic ? ad.businessType.titleAR : ad.businessType.titleEN
         let location = "\(ad.city), \(ad.state)".trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -42,31 +40,39 @@ enum AdCopyLibrary {
 
         let list = phrases(isArabic: isArabic, type: businessType, template: template)
         if list.isEmpty {
-            // Fallback (shouldn't happen)
             return isArabic
             ? "{BUSINESS} — {TYPE} في {CITYSTATE}. للتواصل: {PHONE}."
             : "{BUSINESS} — {TYPE} in {CITYSTATE}. Contact: {PHONE}."
         }
 
-        // Stable index so the same business gets the same sentence
-        let idx = abs(stableKey.hashValue) % list.count
+        let idx = Int(fnv1a64(stableKey) % UInt64(list.count))
         return list[idx]
+    }
+
+    // MARK: - Deterministic hash (FNV-1a 64-bit)
+    private static func fnv1a64(_ s: String) -> UInt64 {
+        let prime: UInt64 = 1099511628211
+        var hash: UInt64 = 14695981039346656037
+        for b in s.utf8 {
+            hash ^= UInt64(b)
+            hash &*= prime
+        }
+        return hash
     }
 
     // MARK: - Library (NO user text)
     private static func phrases(isArabic: Bool, type: Ad.BusinessType, template: Ad.CopyTemplate) -> [String] {
 
-        // Helper: merge base + template flavor
         func base(_ ar: [String], _ en: [String]) -> [String] { isArabic ? ar : en }
 
-        // Base sets per business type (10 each, safe & neutral)
+        // ✅ 10 base phrases لكل BusinessType (نخليها آمنة ومحايدة)
         let restaurantAR = [
             "{BUSINESS} — {TYPE} حلال في {CITYSTATE}.",
             "أشهى الأطباق الحلال بانتظاركم في {BUSINESS}.",
             "تجربة طعام مميزة وأجواء لطيفة في {BUSINESS}.",
             "أطباق متنوعة تناسب كل الأذواق في {BUSINESS}.",
             "وجبات طازجة وخدمة مميزة في {BUSINESS}.",
-            "زورونا في {BUSINESS} واستمتعوا بطعام حلال لذيذ.",
+            "زوروا {BUSINESS} واستمتعوا بطعام حلال لذيذ.",
             "خيار رائع للعائلة والأصدقاء في {BUSINESS}.",
             "{BUSINESS} وجهتكم للطعام الحلال في {CITYSTATE}.",
             "طعم أصيل وجودة عالية في {BUSINESS}.",
@@ -79,7 +85,7 @@ enum AdCopyLibrary {
             "A variety of dishes for every taste at {BUSINESS}.",
             "Fresh meals and friendly service at {BUSINESS}.",
             "Visit {BUSINESS} for a satisfying halal meal.",
-            "Perfect spot for friends and families — {BUSINESS}.",
+            "Perfect for friends and families — {BUSINESS}.",
             "{BUSINESS} is your halal destination in {CITYSTATE}.",
             "Authentic taste and quality at {BUSINESS}.",
             "Call us: {PHONE} — {BUSINESS}."
@@ -179,7 +185,7 @@ enum AdCopyLibrary {
             "The smell of fresh bread at {BUSINESS}.",
             "Great options for hosting at {BUSINESS}.",
             "Visit {BUSINESS} in the morning.",
-            "{BUSINESS} — quality and comfort in every bite.",
+            "{BUSINESS} — quality in every bite.",
             "Family-friendly bakery options at {BUSINESS}.",
             "Questions? {PHONE}.",
             "Address: {ADDRESS}."
@@ -220,7 +226,7 @@ enum AdCopyLibrary {
             "خدمة سريعة وأكل حلال في {BUSINESS}.",
             "{BUSINESS} موجود في {CITYSTATE}.",
             "للطلب: {PHONE}.",
-            "تابعونا وزورونا اليوم!"
+            "تعالوا زورونا اليوم!"
         ]
         let foodTruckEN = [
             "{BUSINESS} — food truck in {CITYSTATE}.",
@@ -299,35 +305,52 @@ enum AdCopyLibrary {
             }
         }()
 
-        // Template flavor (adds a controlled style)
-        let flavor: [String] = {
-            switch template {
-            case .simple:
-                return baseList
+        // ✅ 15 templates = “Style layer” فوق الـ baseList
+        switch template {
+        case .simple:
+            return baseList
 
-            case .halalVerifiedStyle:
-                return baseList.map { s in
-                    (isArabic
-                     ? "✅ حلال | \(s) للتواصل: {PHONE}."
-                     : "✅ Halal | \(s) Contact: {PHONE}.")
-                }
+        case .halalFocused:
+            return baseList.map { s in isArabic ? "✅ حلال | \(s) للتواصل: {PHONE}." : "✅ Halal | \(s) Contact: {PHONE}." }
 
-            case .familyFriendly:
-                return baseList.map { s in
-                    (isArabic
-                     ? "👨‍👩‍👧‍👦 مناسب للعائلة | \(s)"
-                     : "👨‍👩‍👧‍👦 Family-friendly | \(s)")
-                }
+        case .familyFriendly:
+            return baseList.map { s in isArabic ? "👨‍👩‍👧‍👦 مناسب للعائلة | \(s)" : "👨‍👩‍👧‍👦 Family-friendly | \(s)" }
 
-            case .newOpening:
-                return baseList.map { s in
-                    (isArabic
-                     ? "🎉 افتتاح جديد | \(s) زورونا في {ADDRESS}."
-                     : "🎉 New opening | \(s) Visit us at {ADDRESS}.")
-                }
-            }
-        }()
+        case .newOpening:
+            return baseList.map { s in isArabic ? "🎉 افتتاح جديد | \(s) زورونا: {ADDRESS}." : "🎉 New opening | \(s) Visit: {ADDRESS}." }
 
-        return flavor
+        case .communitySupport:
+            return baseList.map { s in isArabic ? "🤝 دعم المجتمع | \(s)" : "🤝 Community support | \(s)" }
+
+        case .popular:
+            return baseList.map { s in isArabic ? "⭐ مكان مميز | \(s)" : "⭐ Popular spot | \(s)" }
+
+        case .deliveryOrCall:
+            return baseList.map { s in isArabic ? "📞 اتصال/توصيل | \(s) هاتف: {PHONE}." : "📞 Call/Delivery | \(s) Phone: {PHONE}." }
+
+        case .locationHighlight:
+            return baseList.map { s in isArabic ? "📍 موقع مميز | \(s) العنوان: {ADDRESS}." : "📍 Great location | \(s) Address: {ADDRESS}." }
+
+        case .bestTimeToVisit:
+            return baseList.map { s in isArabic ? "⏰ أفضل وقت للزيارة | \(s)" : "⏰ Best time to visit | \(s)" }
+
+        case .specialOfferStyle:
+            return baseList.map { s in isArabic ? "🎁 ميزة/عرض | \(s)" : "🎁 Special feature | \(s)" }
+
+        case .fridaySpecial:
+            return baseList.map { s in isArabic ? "🕌/🍽️ الجمعة | \(s)" : "🕌/🍽️ Friday highlight | \(s)" }
+
+        case .weekend:
+            return baseList.map { s in isArabic ? "🌙 الويكند | \(s)" : "🌙 Weekend | \(s)" }
+
+        case .easyParking:
+            return baseList.map { s in isArabic ? "🅿️ مواقف سهلة | \(s)" : "🅿️ Easy parking | \(s)" }
+
+        case .accessible:
+            return baseList.map { s in isArabic ? "♿ سهولة الوصول | \(s)" : "♿ Accessible | \(s)" }
+
+        case .contactNow:
+            return baseList.map { s in isArabic ? "📲 تواصل الآن | \(s) رقم: {PHONE}." : "📲 Contact now | \(s) Phone: {PHONE}." }
+        }
     }
 }
