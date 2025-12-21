@@ -1,3 +1,11 @@
+//
+//  MapScreenViewModel.swift
+//  HalalMapPrime
+//
+//  Created by Zaid Nahleh
+//  Fixed & Stabilized on 12/21/25
+//
+
 import Foundation
 import MapKit
 import Combine
@@ -5,7 +13,7 @@ import SwiftUI
 
 final class MapScreenViewModel: ObservableObject {
 
-    // MARK: - Published Properties
+    // MARK: - Published
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7128, longitude: -74.0060),
         span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
@@ -14,59 +22,62 @@ final class MapScreenViewModel: ObservableObject {
     @Published var places: [Place] = []
     @Published var filteredPlaces: [Place] = []
 
+    // MARK: - Init
     init() {
         loadInitialData()
     }
 
-    // MARK: - Load initial Google data
+    // MARK: - Load Google Places
     func loadInitialData() {
         GooglePlacesService.shared.searchNearbyHalal(
             coordinate: region.center,
             category: nil
-        ) { result in
+        ) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self else { return }
                 switch result {
                 case .success(let loaded):
                     self.places = loaded
                     self.filteredPlaces = loaded
-                    print("[MapScreenViewModel] Loaded \(loaded.count) places")
                 case .failure(let error):
-                    print("❌ Error: \(error)")
+                    print("❌ Google load error:", error)
                 }
             }
         }
     }
 
-    // MARK: - Search by Category
+    // MARK: - Category Search
     func searchNearby(category: PlaceCategory?) {
         GooglePlacesService.shared.searchNearbyHalal(
             coordinate: region.center,
             category: category
-        ) { result in
+        ) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self else { return }
                 switch result {
                 case .success(let loaded):
                     self.places = loaded
                     self.filteredPlaces = loaded
                 case .failure(let error):
-                    print("❌ Category search error: \(error)")
+                    print("❌ Category search error:", error)
                 }
             }
         }
     }
 
-    // MARK: - Filter by Search Text
+    // MARK: - Text Filter
     func filterBySearch(text: String) {
-        if text.isEmpty {
+        let q = text.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if q.isEmpty {
             filteredPlaces = places
         } else {
             filteredPlaces = places.filter {
-                $0.name.lowercased().contains(text.lowercased())
+                $0.name.lowercased().contains(q)
             }
         }
     }
 
-    // MARK: - Focus map on selected place
+    // MARK: - Focus
     func focus(on place: Place) {
         withAnimation {
             region = MKCoordinateRegion(

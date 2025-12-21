@@ -2,15 +2,16 @@
 //  FirebaseAdsService.swift
 //  HalalMapPrime
 //
-//  Created by zaid nahleh on 12/17/25.
+//  Created by Zaid Nahleh on 12/17/25.
+//  Updated by Zaid Nahleh on 12/21/25
 //
 
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
-// MARK: - Ad Model (خفيف وواضح)
-struct HMPAd: Identifiable, Equatable {
+// ✅ Renamed to avoid conflicts with AdsStore/FirebaseAd
+struct HMPMarketplaceAd: Identifiable, Equatable {
     let id: String
     let ownerId: String
 
@@ -25,7 +26,7 @@ struct HMPAd: Identifiable, Equatable {
     let isActive: Bool
     let expiresAt: Date?
 
-    static func from(doc: DocumentSnapshot) -> HMPAd? {
+    static func from(doc: DocumentSnapshot) -> HMPMarketplaceAd? {
         let data = doc.data() ?? [:]
 
         guard
@@ -41,7 +42,7 @@ struct HMPAd: Identifiable, Equatable {
         let createdAtTS = data["createdAt"] as? Timestamp
         let expiresAtTS = data["expiresAt"] as? Timestamp
 
-        return HMPAd(
+        return HMPMarketplaceAd(
             id: doc.documentID,
             ownerId: ownerId,
             title: title,
@@ -74,18 +75,15 @@ struct HMPAd: Identifiable, Equatable {
     }
 }
 
-// MARK: - Firebase Ads Service
-final class FirebaseAdsService {
+// ✅ Renamed to avoid duplicate class name in project
+final class HMPMarketplaceAdsService {
 
-    static let shared = FirebaseAdsService()
+    static let shared = HMPMarketplaceAdsService()
     private init() {}
 
     private let db = Firestore.firestore()
-
-    // خليه ثابت بكل المشروع
     private let adsCollection = "ads"
 
-    // MARK: Create (Save) Ad
     func createAd(
         title: String,
         details: String,
@@ -96,14 +94,14 @@ final class FirebaseAdsService {
     ) async throws -> String {
 
         guard let uid = Auth.auth().currentUser?.uid else {
-            throw NSError(domain: "FirebaseAdsService", code: 401, userInfo: [
+            throw NSError(domain: "HMPMarketplaceAdsService", code: 401, userInfo: [
                 NSLocalizedDescriptionKey: "User not logged in."
             ])
         }
 
         let docRef = db.collection(adsCollection).document()
 
-        let ad = HMPAd(
+        let ad = HMPMarketplaceAd(
             id: docRef.documentID,
             ownerId: uid,
             title: title,
@@ -120,9 +118,7 @@ final class FirebaseAdsService {
         return docRef.documentID
     }
 
-    // MARK: Listener - Active Ads (Real-time)
-    func listenActiveAds(onChange: @escaping ([HMPAd]) -> Void) -> ListenerRegistration {
-
+    func listenActiveAds(onChange: @escaping ([HMPMarketplaceAd]) -> Void) -> ListenerRegistration {
         let query = db.collection(adsCollection)
             .whereField("isActive", isEqualTo: true)
             .order(by: "createdAt", descending: true)
@@ -132,14 +128,12 @@ final class FirebaseAdsService {
                 onChange([])
                 return
             }
-            let ads = docs.compactMap { HMPAd.from(doc: $0) }
+            let ads = docs.compactMap { HMPMarketplaceAd.from(doc: $0) }
             onChange(ads)
         }
     }
 
-    // MARK: Listener - My Ads (Real-time)
-    func listenMyAds(ownerId: String, onChange: @escaping ([HMPAd]) -> Void) -> ListenerRegistration {
-
+    func listenMyAds(ownerId: String, onChange: @escaping ([HMPMarketplaceAd]) -> Void) -> ListenerRegistration {
         let query = db.collection(adsCollection)
             .whereField("ownerId", isEqualTo: ownerId)
             .order(by: "createdAt", descending: true)
@@ -149,17 +143,15 @@ final class FirebaseAdsService {
                 onChange([])
                 return
             }
-            let ads = docs.compactMap { HMPAd.from(doc: $0) }
+            let ads = docs.compactMap { HMPMarketplaceAd.from(doc: $0) }
             onChange(ads)
         }
     }
 
-    // MARK: Hard Delete (حذف حقيقي)
     func deleteAd(adId: String) async throws {
         try await db.collection(adsCollection).document(adId).delete()
     }
 
-    // MARK: Soft Delete (اختياري) - يختفي من active
     func deactivateAd(adId: String) async throws {
         try await db.collection(adsCollection).document(adId).updateData([
             "isActive": false

@@ -1,3 +1,12 @@
+//
+//  EventAdsService.swift
+//  HalalMapPrime
+//
+//  Created by Zaid Nahleh on 2025-12-21.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import Foundation
 import FirebaseFirestore
 

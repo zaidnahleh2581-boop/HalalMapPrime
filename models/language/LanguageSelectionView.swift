@@ -1,101 +1,178 @@
+
 //
-//  LanguageSelectionView.swift
-//  Halal Map Prime
+//  FirebaseAdsService.swift
+//  HalalMapPrime
 //
-//  Created by Zaid Nahleh on 2025-12-15.
+//  Created by Zaid Nahleh on 2025-12-17.
+//  Updated by Zaid Nahleh on 2025-12-21.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
+//  NOTE:
+//  This service is for "community/classified ads" (light ads).
+//  It uses a separate collection to avoid conflict with AdsStore ("ads").
+//
 
-import SwiftUI
+import Foundation
+import FirebaseFirestore
+import FirebaseAuth
 
-struct LanguageSelectionView: View {
+// MARK: - Ad Model (lightweight)
+struct HMPAd: Identifiable, Equatable {
+    let id: String
+    let ownerId: String
 
-    @EnvironmentObject var lang: LanguageManager
+    let title: String
+    let details: String
+    let phone: String
 
-    private func L(_ ar: String, _ en: String) -> String {
-        lang.isArabic ? ar : en
+    let category: String
+    let city: String
+
+    let createdAt: Date
+    let isActive: Bool
+    let expiresAt: Date?
+
+    static func from(doc: DocumentSnapshot) -> HMPAd? {
+        let data = doc.data() ?? [:]
+
+        guard
+            let ownerId = data["ownerId"] as? String,
+            let title = data["title"] as? String,
+            let details = data["details"] as? String,
+            let phone = data["phone"] as? String,
+            let category = data["category"] as? String,
+            let city = data["city"] as? String,
+            let isActive = data["isActive"] as? Bool
+        else { return nil }
+
+        let createdAtTS = data["createdAt"] as? Timestamp
+        let expiresAtTS = data["expiresAt"] as? Timestamp
+
+        return HMPAd(
+            id: doc.documentID,
+            ownerId: ownerId,
+            title: title,
+            details: details,
+            phone: phone,
+            category: category,
+            city: city,
+            createdAt: createdAtTS?.dateValue() ?? Date(),
+            isActive: isActive,
+            expiresAt: expiresAtTS?.dateValue()
+        )
     }
 
-    var body: some View {
-        VStack(spacing: 18) {
+    func toFirestore() -> [String: Any] {
+        var dict: [String: Any] = [
+            "ownerId": ownerId,
+            "title": title,
+            "details": details,
+            "phone": phone,
+            "category": category,
+            "city": city,
+            "createdAt": Timestamp(date: createdAt),
+            "isActive": isActive
+        ]
 
-            Spacer()
-
-            Image(systemName: "globe")
-                .font(.system(size: 46))
-                .foregroundColor(.secondary)
-
-            Text(L("اختر لغة التطبيق", "Choose App Language"))
-                .font(.title2.bold())
-
-            Text(L("يمكنك تغيير اللغة لاحقاً من الإعدادات.", "You can change the language later in Settings."))
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            VStack(spacing: 12) {
-
-                Button {
-                    lang.select(.arabic)
-                } label: {
-                    HStack {
-                        Text("العربية")
-                            .font(.headline)
-                        Spacer()
-                        Image(systemName: lang.current == .arabic ? "checkmark.circle.fill" : "circle")
-                            .imageScale(.large)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(14)
-                }
-                .buttonStyle(.plain)
-
-                Button {
-                    lang.select(.english)
-                } label: {
-                    HStack {
-                        Text("English")
-                            .font(.headline)
-                        Spacer()
-                        Image(systemName: lang.current == .english ? "checkmark.circle.fill" : "circle")
-                            .imageScale(.large)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(14)
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.horizontal)
-
-            Spacer()
-
-            Text(L("بالاستمرار أنت توافق على سياسة الخصوصية وشروط الاستخدام.", "By continuing, you agree to the Privacy Policy and Terms of Use."))
-                .font(.caption)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            Button {
-                // يكفي أن didChooseLanguage صار true داخل select()
-                // والـ Root view المفروض يبدّل تلقائياً للشاشات الرئيسية
-            } label: {
-                Text(L("متابعة", "Continue"))
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green.opacity(0.92))
-                    .foregroundColor(.white)
-                    .cornerRadius(14)
-            }
-            .padding(.horizontal)
-            .padding(.bottom, 10)
+        if let expiresAt {
+            dict["expiresAt"] = Timestamp(date: expiresAt)
         }
-        .padding(.top, 14)
+        return dict
+    }
+}
+
+// MARK: - Firebase Ads Service
+final class FirebaseAdsService {
+
+    static let shared = FirebaseAdsService()
+    private init() {}
+
+    private let db = Firestore.firestore()
+
+    // ✅ مهم: لا تستخدم "ads" حتى لا تتعارض مع AdsStore
+    private let adsCollection = "community_ads"
+
+    // MARK: Create (Save) Ad
+    func createAd(
+        title: String,
+        details: String,
+        phone: String,
+        category: String,
+        city: String,
+        expiresAt: Date? = nil
+    ) async throws -> String {
+
+        guard let uid = Auth.auth().currentUser?.uid else {
+            throw NSError(
+                domain: "FirebaseAdsService",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "User not logged in."]
+            )
+        }
+
+        let docRef = db.collection(adsCollection).document()
+
+        let ad = HMPAd(
+            id: docRef.documentID,
+            ownerId: uid,
+            title: title,
+            details: details,
+            phone: phone,
+            category: category,
+            city: city,
+            createdAt: Date(),
+            isActive: true,
+            expiresAt: expiresAt
+        )
+
+        try await docRef.setData(ad.toFirestore(), merge: false)
+        return docRef.documentID
+    }
+
+    // MARK: Listener - Active Ads (Real-time)
+    func listenActiveAds(onChange: @escaping ([HMPAd]) -> Void) -> ListenerRegistration {
+
+        let query = db.collection(adsCollection)
+            .whereField("isActive", isEqualTo: true)
+            .order(by: "createdAt", descending: true)
+
+        return query.addSnapshotListener { snapshot, error in
+            guard error == nil, let docs = snapshot?.documents else {
+                onChange([])
+                return
+            }
+            let ads = docs.compactMap { HMPAd.from(doc: $0) }
+            onChange(ads)
+        }
+    }
+
+    // MARK: Listener - My Ads (Real-time)
+    func listenMyAds(ownerId: String, onChange: @escaping ([HMPAd]) -> Void) -> ListenerRegistration {
+
+        let query = db.collection(adsCollection)
+            .whereField("ownerId", isEqualTo: ownerId)
+            .order(by: "createdAt", descending: true)
+
+        return query.addSnapshotListener { snapshot, error in
+            guard error == nil, let docs = snapshot?.documents else {
+                onChange([])
+                return
+            }
+            let ads = docs.compactMap { HMPAd.from(doc: $0) }
+            onChange(ads)
+        }
+    }
+
+    // MARK: Hard Delete
+    func deleteAd(adId: String) async throws {
+        try await db.collection(adsCollection).document(adId).delete()
+    }
+
+    // MARK: Soft Delete (hide from active)
+    func deactivateAd(adId: String) async throws {
+        try await db.collection(adsCollection).document(adId).updateData([
+            "isActive": false
+        ])
     }
 }

@@ -1,36 +1,42 @@
+//
+//  LanguageManager.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh
+//  Updated by Zaid Nahleh on 12/21/25
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import Foundation
 import Combine
 
 final class LanguageManager: ObservableObject {
 
-    @Published var current: AppLanguage {
-        didSet {
-            UserDefaults.standard.set(current.rawValue, forKey: "appLanguage")
-            UserDefaults.standard.set(true, forKey: "didChooseLanguage")
-        }
+    enum AppLanguage: String, CaseIterable, Codable {
+        case arabic
+        case english
     }
 
-    @Published var didChooseLanguage: Bool
+    private let keyCurrent = "HMP_language_current"
+    private let keyDidChoose = "HMP_language_didChoose"
 
-    var isArabic: Bool {
-        current == .arabic
-    }
+    @Published private(set) var current: AppLanguage
+    @Published private(set) var didChooseLanguage: Bool
 
     init() {
-        let chosen = UserDefaults.standard.bool(forKey: "didChooseLanguage")
-        self.didChooseLanguage = chosen
-
-        if let saved = UserDefaults.standard.string(forKey: "appLanguage"),
-           let lang = AppLanguage(rawValue: saved) {
-            self.current = lang
-        } else {
-            // اللغة الافتراضية: إنجليزي
-            self.current = .english
-        }
+        let saved = UserDefaults.standard.string(forKey: keyCurrent)
+        self.current = AppLanguage(rawValue: saved ?? "") ?? .english
+        self.didChooseLanguage = UserDefaults.standard.bool(forKey: keyDidChoose)
     }
+
+    var isArabic: Bool { current == .arabic }
 
     func select(_ language: AppLanguage) {
         current = language
         didChooseLanguage = true
+
+        UserDefaults.standard.set(language.rawValue, forKey: keyCurrent)
+        UserDefaults.standard.set(true, forKey: keyDidChoose)
     }
 }
