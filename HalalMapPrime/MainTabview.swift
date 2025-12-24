@@ -1,60 +1,77 @@
+//
+//  MainTabView.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
 struct MainTabView: View {
 
     @EnvironmentObject var lang: LanguageManager
-    @State private var selectedTab: Int = 1
+
+    // ✅ Home هو الافتراضي
+    @State private var selectedTab: Int = 0
 
     private var tintColor: Color {
         switch selectedTab {
-        case 0: return .blue        // Add Location
-        case 2: return .teal        // Faith Tools
-        case 4: return .orange      // Paid Ads
-        default: return .green      // Map / Community
+        case 0: return .orange   // Home
+        case 1: return .green    // Jobs
+        case 2: return .teal     // Map
+        case 3: return .indigo   // Faith
+        case 4: return .gray     // More
+        default: return .orange
         }
     }
 
     var body: some View {
         TabView(selection: $selectedTab) {
 
-            // 0️⃣ Add Location (Blue)
-            AddStoreScreen()
-                .tag(0)
+            // 0️⃣ Home
+            HomeOverviewScreen(
+                onOpenJobs: { selectedTab = 1 },
+                onOpenMap: { selectedTab = 2 },
+                onOpenFaith: { selectedTab = 3 }
+            )
+            .tag(0)
+            .tabItem {
+                Image(systemName: "house.fill")
+                Text(lang.isArabic ? "الرئيسية" : "Home")
+            }
+
+            // 1️⃣ Jobs (الذهب)
+            CommunityHubScreen()
+                .tag(1)
                 .tabItem {
-                    Image(systemName: "plus.circle.fill")
-                    Text(lang.isArabic ? "أضف عنوانك" : "Add Location")
+                    Image(systemName: "briefcase.fill")
+                    Text(lang.isArabic ? "وظائف" : "Jobs")
                 }
 
-            // 1️⃣ Map (Center)
+            // 2️⃣ Map
             MapScreen()
-                .tag(1)
+                .tag(2)
                 .tabItem {
                     Image(systemName: "map.fill")
                     Text(lang.isArabic ? "الخريطة" : "Map")
                 }
 
-            // 2️⃣ Faith Tools (NEW)
+            // 3️⃣ Faith
             FaithToolsScreen()
-                .tag(2)
-                .tabItem {
-                    Image(systemName: "moon.stars.fill")
-                    Text(lang.isArabic ? "أدوات الإيمان" : "Faith")
-                }
-
-            // 3️⃣ Community
-            CommunityHubScreen()
                 .tag(3)
                 .tabItem {
-                    Image(systemName: "person.3.fill")
-                    Text(lang.isArabic ? "الكميونتي" : "Community")
+                    Image(systemName: "moon.stars.fill")
+                    Text(lang.isArabic ? "الإيمان" : "Faith")
                 }
 
-            // 4️⃣ Paid Ads (Orange) — ONLY Paid Ads entry point
-            AdsHomeScreen()
+            // 4️⃣ More
+            MoreScreen()
                 .tag(4)
                 .tabItem {
-                    Image(systemName: "megaphone.fill")
-                    Text(lang.isArabic ? "إعلانات مدفوعة" : "Paid Ads")
+                    Image(systemName: "ellipsis.circle.fill")
+                    Text(lang.isArabic ? "المزيد" : "More")
                 }
         }
         .tint(tintColor)

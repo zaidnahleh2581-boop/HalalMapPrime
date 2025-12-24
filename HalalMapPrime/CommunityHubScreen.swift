@@ -1,41 +1,44 @@
+//
+//  CommunityHubScreen.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
-/// مركز المجتمع في Halal Map Prime:
-/// - إعلانات مجانية (وظائف + فعاليات + لوحة عامة)
-/// - إضافة مسجد / محل
-/// - ميزات قادمة
 struct CommunityHubScreen: View {
 
     @EnvironmentObject var lang: LanguageManager
 
-    // شيتات
-    @State private var showJobsBoard: Bool = false        // شاشة إعلانات الوظائف
-    @State private var showEventsBoard: Bool = false      // شاشة إعلانات الفعاليات
-    @State private var showNoticeBoard: Bool = false      // شاشة لوحة الإعلانات العامة
-    @State private var showAddPlace: Bool = false         // شاشة إضافة مسجد / محل
+    // Sheets
+    @State private var showJobsBoard: Bool = false
+    @State private var showPostJob: Bool = false
+    @State private var showEventsBoard: Bool = false
+    @State private var showNoticeBoard: Bool = false
+    @State private var showAddPlace: Bool = false
 
-    private func L(_ ar: String, _ en: String) -> String {
-        lang.isArabic ? ar : en
-    }
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 18) {
+                VStack(spacing: 16) {
 
                     headerSection
                         .padding(.horizontal)
 
-                    // قسم الإعلانات المجانية
-                    freeAdsSection
+                    // 🔥 GOLD: Jobs first
+                    jobsHeroSection
                         .padding(.horizontal)
 
-                    // ✅ قسم إضافة مسجد / محل
+                    // Community Updates (secondary)
+                    updatesSection
+                        .padding(.horizontal)
+
                     addPlaceSection
-                        .padding(.horizontal)
-
-                    // قسم الميزات القادمة
-                    comingSoonSection
                         .padding(.horizontal)
 
                     Spacer(minLength: 16)
@@ -43,12 +46,16 @@ struct CommunityHubScreen: View {
                 .padding(.top, 12)
             }
             .background(Color(.systemGroupedBackground).ignoresSafeArea())
-            .navigationTitle(L("مركز المجتمع", "Community hub"))
+            .navigationTitle(L("وظائف المجتمع", "Community Jobs"))
             .navigationBarTitleDisplayMode(.inline)
 
-            // ✅ الشاشات المرتبطة
+            // Sheets
             .sheet(isPresented: $showJobsBoard) {
                 JobAdsBoardView()
+                    .environmentObject(lang)
+            }
+            .sheet(isPresented: $showPostJob) {
+                JobAdsScreen()
                     .environmentObject(lang)
             }
             .sheet(isPresented: $showEventsBoard) {
@@ -71,7 +78,6 @@ struct CommunityHubScreen: View {
 
 private extension CommunityHubScreen {
 
-    /// هيدر بهوية مجتمع إسلامي
     var headerSection: some View {
         HStack(alignment: .top, spacing: 10) {
             ZStack {
@@ -86,20 +92,20 @@ private extension CommunityHubScreen {
                             endPoint: .bottomTrailing
                         )
                     )
-                Image(systemName: "person.3.fill")
+                Image(systemName: "briefcase.fill")
                     .font(.subheadline.bold())
                     .foregroundColor(.white)
             }
             .frame(width: 40, height: 40)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(L("مجتمع حلال ماب برايم", "Halal Map Prime community"))
+                Text(L("وظائف وفرص قريبة منك", "Jobs & opportunities near you"))
                     .font(.headline)
 
                 Text(
                     L(
-                        "كل ما يخص المجتمع المسلم حولك من وظائف، فعاليات، ومساحة إعلانات عامة في مكان واحد.",
-                        "Everything happening in the Muslim community around you: jobs, events, and a community notice board."
+                        "هنا الشغل المتاح اليوم. تصفح الوظائف أو انشر إعلان توظيف بسرعة.",
+                        "See available jobs today. Browse jobs or post a hiring ad fast."
                     )
                 )
                 .font(.footnote)
@@ -110,162 +116,140 @@ private extension CommunityHubScreen {
         }
     }
 
-    /// قسم الإعلانات المجانية (وظائف + فعاليات + لوحة عامة)
-    var freeAdsSection: some View {
+    // 🔥 Jobs section (The gold)
+    var jobsHeroSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L("إعلانات المجتمع المجانية", "Free community ads"))
+
+            Text(L("الوظائف (الأهم)", "Jobs (Most important)"))
                 .font(.subheadline.bold())
 
             Text(
                 L(
-                    "نساعد من يبحث عن عمل أو يعلن عن فعالية أو ينشر إعلاناً عاماً داخل المجتمع المسلم.",
-                    "We help people looking for jobs, posting events or sharing general notices inside the Muslim community."
+                    "اضغط زر واحد للتصفح، وزر واحد للنشر.",
+                    "One tap to browse, one tap to post."
                 )
             )
             .font(.caption)
             .foregroundColor(.secondary)
 
+            HStack(spacing: 10) {
+
+                Button {
+                    showJobsBoard = true
+                } label: {
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        Text(L("عرض الوظائف", "Browse jobs"))
+                            .font(.subheadline.bold())
+                        Spacer()
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 12)
+                    .background(Color.green.opacity(0.95))
+                    .foregroundColor(.white)
+                    .cornerRadius(14)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    showPostJob = true
+                } label: {
+                    HStack {
+                        Image(systemName: "plus.circle.fill")
+                        Text(L("انشر وظيفة", "Post a job"))
+                            .font(.subheadline.bold())
+                        Spacer()
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 12)
+                    .background(Color(.systemBackground))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+                    .cornerRadius(14)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+    }
+
+    // Secondary
+    var updatesSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+
+            Text(L("تحديثات المجتمع", "Community updates"))
+                .font(.subheadline.bold())
+
             VStack(spacing: 10) {
 
-                // وظائف
                 FreeAdCard(
-                    title: L("إعلانات الوظائف", "Job ads"),
-                    subtitle: L("أبحث عن عمل أو أبحث عن موظف", "Looking for a job or hiring"),
-                    icon: "briefcase.fill",
-                    accent: .green
-                ) {
-                    showJobsBoard = true
-                }
-
-                // فعاليات
-                FreeAdCard(
-                    title: L("إعلانات الفعاليات", "Events ads"),
-                    subtitle: L("إفطارات، دروس، لقاءات، نشاطات للمجتمع", "Iftars, lectures, meetups and community activities"),
+                    title: L("إعلانات الفعاليات", "Events"),
+                    subtitle: L("إفطارات، دروس، لقاءات ونشاطات", "Iftars, lectures, meetups & activities"),
                     icon: "calendar.badge.plus",
                     accent: .blue
-                ) {
-                    showEventsBoard = true
-                }
+                ) { showEventsBoard = true }
 
-                // لوحة عامة
                 FreeAdCard(
-                    title: L("لوحة الإعلانات العامة", "Community notice board"),
-                    subtitle: L("إعلانات عامة، تنبيهات، أشياء مفقودة، وغير ذلك", "General announcements, alerts, lost & found and more"),
+                    title: L("لوحة الإعلانات العامة", "Notice board"),
+                    subtitle: L("تنبيهات، مفقودات، إعلانات عامة", "Alerts, lost & found, general notices"),
                     icon: "text.bubble.fill",
                     accent: .teal
-                ) {
-                    showNoticeBoard = true
-                }
+                ) { showNoticeBoard = true }
             }
         }
     }
 
-    /// قسم إضافة مسجد / محل / نشاط
     var addPlaceSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(L("شارك مكانك مع المجتمع", "Share your place with the community"))
+
+            Text(L("شارك مكانك مع المجتمع", "Share your place"))
                 .font(.subheadline.bold())
 
             Text(
                 L(
-                    "أضف مسجدًا، مطعمًا حلالاً، محل بقالة أو أي نشاط يخدم المجتمع المسلم من حولك.",
-                    "Add a masjid, halal restaurant, grocery or any place that serves the Muslim community around you."
+                    "أضف مسجدًا، مطعمًا حلالاً، محل بقالة أو أي نشاط يخدم المجتمع.",
+                    "Add a masjid, halal restaurant, grocery, or any place serving the community."
                 )
             )
             .font(.caption)
             .foregroundColor(.secondary)
 
-            Button {
-                showAddPlace = true
-            } label: {
+            Button { showAddPlace = true } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.title3)
                         .foregroundColor(.white)
                         .padding(6)
-                        .background(
-                            Circle()
-                                .fill(Color(red: 0.00, green: 0.55, blue: 0.50))
-                        )
+                        .background(Circle().fill(Color(red: 0.00, green: 0.55, blue: 0.50)))
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(L("إضافة مسجد / مطعم / محل حلال", "Add masjid / restaurant / halal store"))
                             .font(.subheadline.bold())
 
-                        Text(
-                            L(
-                                "ساعد غيرك أن يجد الأماكن الحلال بسهولة على الخريطة.",
-                                "Help others easily find halal places on the map."
-                            )
-                        )
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                        Text(L("ساعد غيرك يجد الأماكن بسهولة.", "Help others find halal places easily."))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
 
                     Spacer()
                 }
                 .padding(12)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemBackground))
-                )
+                .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemBackground)))
                 .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
             }
             .buttonStyle(.plain)
         }
     }
-
-    /// قسم الميزات القادمة للمجتمع
-    var comingSoonSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(L("ميزات قادمة للمجتمع", "Coming soon for the community"))
-                .font(.subheadline.bold())
-
-            VStack(spacing: 10) {
-                comingSoonRow(
-                    icon: "cart.badge.plus",
-                    title: L("سوق مجتمعي للمنتجات الحلال", "Community halal marketplace"),
-                    message: L(
-                        "مساحة لبيع وشراء المنتجات الحلال بين أفراد المجتمع.",
-                        "A space to buy and sell halal products between community members."
-                    )
-                )
-
-                comingSoonRow(
-                    icon: "heart.text.square",
-                    title: L("مساحة خاصة للجمعيات الخيرية والزكاة", "Space for charities & zakat"),
-                    message: L(
-                        "معلومات عن حملات خيرية وطرق موثوقة للتبرّع والزكاة.",
-                        "Information about charity campaigns and trusted ways to donate and give zakat."
-                    )
-                )
-            }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(.systemBackground))
-            )
-            .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
-        }
-    }
-
-    private func comingSoonRow(icon: String, title: String, message: String) -> some View {
-        HStack(spacing: 10) {
-            Image(systemName: icon)
-                .foregroundColor(.secondary)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.footnote.weight(.semibold))
-                Text(message)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-            Spacer()
-        }
-    }
 }
 
-// MARK: - Free Ad Card Component
+// MARK: - Card
 
 private struct FreeAdCard: View {
 
@@ -300,12 +284,10 @@ private struct FreeAdCard: View {
                 Spacer()
             }
             .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: 14)
-                    .fill(Color(.systemBackground))
-            )
+            .background(RoundedRectangle(cornerRadius: 14).fill(Color(.systemBackground)))
             .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
         }
         .buttonStyle(.plain)
     }
 }
+

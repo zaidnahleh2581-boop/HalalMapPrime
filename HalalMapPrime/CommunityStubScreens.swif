@@ -1,0 +1,19 @@
+import SwiftUI
+
+//
+//  CommunityStubScreens.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
+struct CommunityStubScreen: View {
+    @EnvironmentObject var lang: LanguageManager
+
+    var body: some View {
+        Text(lang.isArabic ? "صفحة المجتمع" : "Community hub")
+            .padding()
+    }
+}

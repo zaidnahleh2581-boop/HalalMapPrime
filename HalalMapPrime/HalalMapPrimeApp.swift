@@ -5,6 +5,7 @@ import FirebaseCore
 struct HalalMapPrimeApp: App {
 
     @StateObject private var languageManager = LanguageManager()
+    @StateObject private var locationManager = LocationManager()
 
     init() {
         FirebaseApp.configure()
@@ -14,6 +15,7 @@ struct HalalMapPrimeApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(languageManager)
+                .environmentObject(locationManager)
         }
     }
 }

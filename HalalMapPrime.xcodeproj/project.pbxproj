@@ -15,6 +15,8 @@
 		151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */; };
 		151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* FreeAdFormView.swift */; };
 		151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F22EE597800065F10C /* MyAdsView.swift */; };
+		152CCE1F2EFB47E60017D404 /* HomeLiveFeedScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152CCE1E2EFB47E60017D404 /* HomeLiveFeedScreen.swift */; };
+		152CCE252EFB4B890017D404 /* HomeOverviewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 152CCE242EFB4B890017D404 /* HomeOverviewScreen.swift */; };
 		15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */; };
 		1578D8862EE33C8C0053A7CE /* JobAdsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1578D8852EE33C8C0053A7CE /* JobAdsScreen.swift */; };
 		15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A0D7872EE05AF00063ED79 /* MapScreen.swift */; };
@@ -35,6 +37,8 @@
 		15B48CEB2EE1B2A600A88AB7 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 15B48CEA2EE1B2A600A88AB7 /* FirebaseMessaging */; };
 		15B48CED2EE1B2A600A88AB7 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 15B48CEC2EE1B2A600A88AB7 /* FirebaseStorage */; };
 		15B48CF32EE1E50300A88AB7 /* GooglePlacesModelsswift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B48CF22EE1E50300A88AB7 /* GooglePlacesModelsswift.swift */; };
+		15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C0B4BA2EFC8F8600532F0F /* FiLocationManagerle.swift */; };
+		15C0B4BD2EFC8FC200532F0F /* LocationPermissionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C0B4BC2EFC8FC200532F0F /* LocationPermissionView.swift */; };
 		15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB1F52EE78A810035A83D /* EventAdsService.swift */; };
 		15CEB1F82EE78AB00035A83D /* EventAdComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */; };
 		15CEB2042EE7C5DF0035A83D /* NoticeBoardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */; };
@@ -53,6 +57,8 @@
 		151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAdPlanView.swift; sourceTree = "<group>"; };
 		151BD9F02EE597570065F10C /* FreeAdFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeAdFormView.swift; sourceTree = "<group>"; };
 		151BD9F22EE597800065F10C /* MyAdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAdsView.swift; sourceTree = "<group>"; };
+		152CCE1E2EFB47E60017D404 /* HomeLiveFeedScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeLiveFeedScreen.swift; sourceTree = "<group>"; };
+		152CCE242EFB4B890017D404 /* HomeOverviewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeOverviewScreen.swift; sourceTree = "<group>"; };
 		15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdComposerViewswift.swift; sourceTree = "<group>"; };
 		1578D8852EE33C8C0053A7CE /* JobAdsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdsScreen.swift; sourceTree = "<group>"; };
 		15A0D7732EE055040063ED79 /* HalalMapPrime.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HalalMapPrime.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -66,6 +72,8 @@
 		15A0D7A32EE0BBD90063ED79 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		15B48CDB2EE1A70C00A88AB7 /* AddStoreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStoreViewModel.swift; sourceTree = "<group>"; };
 		15B48CF22EE1E50300A88AB7 /* GooglePlacesModelsswift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GooglePlacesModelsswift.swift; sourceTree = SOURCE_ROOT; };
+		15C0B4BA2EFC8F8600532F0F /* FiLocationManagerle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiLocationManagerle.swift; sourceTree = SOURCE_ROOT; };
+		15C0B4BC2EFC8FC200532F0F /* LocationPermissionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPermissionView.swift; sourceTree = SOURCE_ROOT; };
 		15CEB1F52EE78A810035A83D /* EventAdsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAdsService.swift; sourceTree = "<group>"; };
 		15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAdComposerView.swift; sourceTree = "<group>"; };
 		15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoticeBoardViews.swift; sourceTree = "<group>"; };
@@ -160,6 +168,8 @@
 				15B48CDB2EE1A70C00A88AB7 /* AddStoreViewModel.swift */,
 				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
 				15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */,
+				152CCE1E2EFB47E60017D404 /* HomeLiveFeedScreen.swift */,
+				152CCE242EFB4B890017D404 /* HomeOverviewScreen.swift */,
 			);
 			path = views;
 			sourceTree = "<group>";
@@ -177,6 +187,8 @@
 			children = (
 				15E162472EE0D50500A5C42C /* GooglePlacesService.swift */,
 				15B48CF22EE1E50300A88AB7 /* GooglePlacesModelsswift.swift */,
+				15C0B4BA2EFC8F8600532F0F /* FiLocationManagerle.swift */,
+				15C0B4BC2EFC8FC200532F0F /* LocationPermissionView.swift */,
 			);
 			path = services;
 			sourceTree = "<group>";
@@ -283,6 +295,7 @@
 				151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */,
 				15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */,
 				151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */,
+				152CCE1F2EFB47E60017D404 /* HomeLiveFeedScreen.swift in Sources */,
 				15CEB20A2EE7CC780035A83D /* EventAdsBoardView.swift in Sources */,
 				15CEB2042EE7C5DF0035A83D /* NoticeBoardViews.swift in Sources */,
 				151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */,
@@ -297,13 +310,16 @@
 				15A0D7A02EE068740063ED79 /* BannerAd.swift in Sources */,
 				15E162482EE0D50500A5C42C /* GooglePlacesService.swift in Sources */,
 				151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */,
+				152CCE252EFB4B890017D404 /* HomeOverviewScreen.swift in Sources */,
 				15B48CF32EE1E50300A88AB7 /* GooglePlacesModelsswift.swift in Sources */,
 				15A0D7A22EE07FE90063ED79 /* samplePlaces.swift in Sources */,
 				15E1626F2EE121DC00A5C42C /* Place.swift in Sources */,
 				15A0D79C2EE060900063ED79 /* PlaceDetailView.swift in Sources */,
+				15C0B4BD2EFC8FC200532F0F /* LocationPermissionView.swift in Sources */,
 				15E1624A2EE0D5D600A5C42C /* MapScreenViewModel.swift in Sources */,
 				151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */,
 				151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */,
+				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,
 				15A0D79E2EE0626B0063ED79 /* AddStoreScreen.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -442,6 +458,7 @@
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby halal places and jobs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -474,6 +491,7 @@
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby halal places and jobs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
