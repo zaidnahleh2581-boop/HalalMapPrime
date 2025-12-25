@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		15109F8D2EFD62510068DFE3 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15109F8C2EFD62510068DFE3 /* AppRouter.swift */; };
 		151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E12EE521030065F10C /* AppLanguage.swift */; };
 		151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E32EE5223D0065F10C /* LanguageManager.swift */; };
 		151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E52EE522760065F10C /* LanguageSelectionView.swift */; };
@@ -50,6 +51,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		15109F8C2EFD62510068DFE3 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
 		151BD9E12EE521030065F10C /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLanguage.swift; path = views/AppLanguage.swift; sourceTree = SOURCE_ROOT; };
 		151BD9E32EE5223D0065F10C /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		151BD9E52EE522760065F10C /* LanguageSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionView.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 				15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */,
 				15CEB1F52EE78A810035A83D /* EventAdsService.swift */,
 				15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */,
+				15109F8C2EFD62510068DFE3 /* AppRouter.swift */,
 			);
 			path = ADS;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 				151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */,
 				15CEB1F82EE78AB00035A83D /* EventAdComposerView.swift in Sources */,
 				151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */,
+				15109F8D2EFD62510068DFE3 /* AppRouter.swift in Sources */,
 				15A0D79A2EE0605D0063ED79 /* PlaceRowView.swift in Sources */,
 				15683DDF2EE701270011A09F /* JobAdComposerViewswift.swift in Sources */,
 				1578D8862EE33C8C0053A7CE /* JobAdsScreen.swift in Sources */,

@@ -257,13 +257,38 @@ struct PrivacySecurityView: View {
                         .font(.subheadline)
                         .foregroundColor(.secondary)
 
-                        Text("support@halalmapprime.com")
+                        Text("info@halalmapprime.com")
                             .font(.subheadline.bold())
                         Text("+1 (631) 947-5782")
                             .font(.subheadline.bold())
                     }
                 }
+                GroupBox(L("الموقع الرسمي وسياسة الخصوصية", "Official Website & Privacy Policy")) {
+                    VStack(alignment: .leading, spacing: 10) {
 
+                        Text(L(
+                            "يمكنك قراءة سياسة الخصوصية الكاملة والمحدّثة عبر موقعنا الرسمي:",
+                            "You can read the full and updated Privacy Policy on our official website:"
+                        ))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                        Link(destination: URL(string: "https://halalmapprime.com/privacy")!) {
+                            HStack {
+                                Image(systemName: "globe")
+                                Text("halalmapprime.com/privacy")
+                                    .font(.subheadline.weight(.semibold))
+                            }
+                        }
+
+                        Text(L(
+                            "في حال وجود أي تعارض بين هذا الملخص وسياسة الخصوصية على الموقع، يُعتمد النص المنشور على الموقع.",
+                            "In case of any conflict between this summary and the website policy, the website version prevails."
+                        ))
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                    }
+                }
                 Spacer(minLength: 24)
             }
             .padding()

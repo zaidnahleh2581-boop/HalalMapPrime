@@ -1,50 +1,76 @@
+//
+//  MainTabView.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Updated by Zaid Nahleh on 2025-12-25.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
 struct MainTabView: View {
 
     @EnvironmentObject var lang: LanguageManager
-    @State private var selectedTab = 0
+    @State private var selectedTab: Int = 0
 
-    private var homeTitle: String { lang.isArabic ? "الرئيسية" : "Home" }
-    private var jobsTitle: String { lang.isArabic ? "وظائف" : "Jobs" }
-    private var adsTitle: String { lang.isArabic ? "إعلانات" : "Ads" }
-    private var moreTitle: String { lang.isArabic ? "المزيد" : "More" }
+    private func L(_ ar: String, _ en: String) -> String {
+        lang.isArabic ? ar : en
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
 
             // 1) Home
-            HomeOverviewScreen()
-                .tag(0)
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text(homeTitle)
-                }
+            NavigationStack {
+                HomeOverviewScreen()
+            }
+            .tabItem {
+                Image(systemName: "house.fill")
+                Text(L("الرئيسية", "Home"))
+            }
+            .tag(0)
 
-            // 2) Jobs (مؤقت/لو عندك شاشة وظائف حقيقية حطها هنا)
-            JobAdsBoardView()
-                .tag(1)
-                .tabItem {
-                    Image(systemName: "briefcase.fill")
-                    Text(jobsTitle)
-                }
+            // 2) Jobs
+            NavigationStack {
+                JobAdsScreen()
+            }
+            .tabItem {
+                Image(systemName: "briefcase.fill")
+                Text(L("وظائف", "Jobs"))
+            }
+            .tag(1)
 
-            // 3) Paid Ads
-            AdsHomeScreen()
-                .tag(2)
-                .tabItem {
-                    Image(systemName: "megaphone.fill")
-                    Text(adsTitle)
-                }
+            // 3) Ads
+            NavigationStack {
+                AdsHomeView()
+            }
+            .tabItem {
+                Image(systemName: "megaphone.fill")
+                Text(L("إعلانات", "Ads"))
+            }
+            .tag(2)
 
-            // 4) More (الخصوصية والشروط وكل شيء)
-            MoreScreen()
-                .tag(3)
-                .tabItem {
-                    Image(systemName: "ellipsis.circle.fill")
-                    Text(moreTitle)
-                }
+            // 4) Community (وفيها رح نحط زر "المزيد" بدل تبويب More)
+            NavigationStack {
+                CommunityHubScreen()
+            }
+            .tabItem {
+                Image(systemName: "person.3.fill")
+                Text(L("المجتمع", "Community"))
+            }
+            .tag(3)
+
+            // 5) Faith tools (بديل تبويب المزيد)
+            NavigationStack {
+                FaithToolsScreen()
+            }
+            .tabItem {
+                Image(systemName: "moon.stars.fill")
+                Text(L("الإيمان", "Faith"))
+            }
+            .tag(4)
         }
-        .tint(.orange)
     }
 }

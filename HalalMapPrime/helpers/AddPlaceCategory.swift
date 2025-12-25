@@ -5,7 +5,7 @@ import SwiftUI
 enum PlaceCategory: String, CaseIterable, Identifiable, Codable, Hashable {
 
     case restaurant = "Restaurant"
-    case grocery    = "Grocery"
+    case grocery    = " Grocery"
     case school     = "School"
     case mosque     = "Mosque"
     case service    = "Service"

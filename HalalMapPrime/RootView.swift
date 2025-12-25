@@ -20,12 +20,21 @@ struct RootView: View {
         // 2️⃣ Location permission
         } else if !isLocationAuthorized {
             LocationPermissionView {
-                // onContinue
+                // ✅ Request permission when user taps Continue
+                locationManager.requestWhenInUseAuthorizationIfNeeded()
+            }
+            .onAppear {
+                // ✅ Also request automatically when this screen appears
+                locationManager.requestWhenInUseAuthorizationIfNeeded()
             }
 
         // 3️⃣ Main app
         } else {
             MainTabView()
+                .onAppear {
+                    // ✅ Make sure we attempt to fetch a location once authorized
+                    locationManager.requestSingleLocationIfPossible()
+                }
         }
     }
 
