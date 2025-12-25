@@ -22,8 +22,15 @@ struct MapScreen: View {
     @State private var selectedCategory: PlaceCategory? = nil
     @State private var searchText: String = ""
     @State private var showResults: Bool = true
+
+    // ✅ الخطوة 3: المكان المختار للـ Sheet
     @State private var selectedPlace: Place? = nil
+
     @State private var showCategoriesRow: Bool = false
+
+    // ✅ للـ UX: وقت يشتغل Search حقيقي
+    @State private var isSearching: Bool = false
+    @State private var lastSubmittedQuery: String = ""
 
     // MARK: - Init
     init(
@@ -36,8 +43,6 @@ struct MapScreen: View {
 
     // MARK: - Body
     var body: some View {
-
-        // ✅ لا تضع NavigationStack هنا (لأن الأب أصلاً NavigationStack)
         ScrollView {
             VStack(spacing: 12) {
 
@@ -63,15 +68,23 @@ struct MapScreen: View {
             .padding(.bottom, 16)
         }
         .scrollDismissesKeyboard(.interactively)
-        .navigationDestination(item: $selectedPlace) { place in
-            PlaceDetailView(place: place)
+
+        // ✅ الخطوة 3: Bottom Sheet تفاصيل المكان
+        .sheet(item: $selectedPlace) { place in
+            PlaceDetailsSheet(place: place)
+                .environmentObject(lang)
+                .presentationDetents([.medium, .large])
         }
+
         .onAppear {
-            // ✅ إذا فتحت من Home وبعتنا startingCategory
             if let startingCategory {
                 selectedCategory = startingCategory
+                // ✅ أول تحميل: جلب قريب
                 viewModel.searchNearby(category: startingCategory)
                 viewModel.filterBySearch(text: searchText)
+            } else {
+                // ✅ لو ما في startingCategory: اعمل جلب عام (اختياري)
+                viewModel.searchNearby(category: nil)
             }
         }
     }
@@ -81,6 +94,43 @@ struct MapScreen: View {
 private extension MapScreen {
     func L(_ ar: String, _ en: String) -> String {
         lang.isArabic ? ar : en
+    }
+}
+
+// MARK: - Actions (Real Search)
+private extension MapScreen {
+
+    func submitSearch() {
+        let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // ✅ لو نفس الكلمة انضغط Search مرة ثانية ما نعيد طلب
+        if q == lastSubmittedQuery { return }
+        lastSubmittedQuery = q
+
+        // ✅ إذا فاضي: ارجع Nearby
+        if q.isEmpty {
+            isSearching = false
+            viewModel.searchNearby(category: selectedCategory)
+            viewModel.filterBySearch(text: "")
+            return
+        }
+
+        // ✅ بحث حقيقي
+        isSearching = true
+        viewModel.searchByText(query: q, category: selectedCategory) { _ in
+            DispatchQueue.main.async {
+                self.isSearching = false
+                self.viewModel.filterBySearch(text: self.searchText)
+            }
+        }
+    }
+
+    func clearSearch() {
+        searchText = ""
+        lastSubmittedQuery = ""
+        isSearching = false
+        viewModel.searchNearby(category: selectedCategory)
+        viewModel.filterBySearch(text: "")
     }
 }
 
@@ -114,35 +164,49 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // Search Bar
+    // ✅ Search Bar (Real)
     var searchBar: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
+        HStack(spacing: 10) {
 
-            TextField(
-                L("ابحث عن مكان حلال…", "Search for a halal place…"),
-                text: $searchText
-            )
-            .textInputAutocapitalization(.never)
-            .disableAutocorrection(true)
-            .onChange(of: searchText) { value in
-                viewModel.filterBySearch(text: value)
-            }
+            HStack {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
 
-            if !searchText.isEmpty {
-                Button {
-                    searchText = ""
-                    viewModel.filterBySearch(text: "")
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
+                TextField(
+                    L("ابحث عن مكان حلال…", "Search for a halal place…"),
+                    text: $searchText
+                )
+                .textInputAutocapitalization(.never)
+                .disableAutocorrection(true)
+                .submitLabel(.search)
+                .onSubmit { submitSearch() }
+                .onChange(of: searchText) { value in
+                    viewModel.filterBySearch(text: value)
+                }
+
+                if !searchText.isEmpty {
+                    Button { clearSearch() } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.secondary)
+                    }
                 }
             }
+            .padding(10)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+
+            Button { submitSearch() } label: {
+                if isSearching {
+                    ProgressView()
+                        .scaleEffect(0.9)
+                        .frame(width: 36, height: 36)
+                } else {
+                    Image(systemName: "arrow.right.circle.fill")
+                        .font(.system(size: 28))
+                }
+            }
+            .buttonStyle(.plain)
         }
-        .padding(10)
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
         .padding(.horizontal)
     }
 
@@ -151,9 +215,7 @@ private extension MapScreen {
         VStack(spacing: 6) {
 
             Button {
-                withAnimation {
-                    showCategoriesRow.toggle()
-                }
+                withAnimation { showCategoriesRow.toggle() }
             } label: {
                 HStack {
                     Image(systemName: "line.3.horizontal.decrease.circle")
@@ -171,11 +233,34 @@ private extension MapScreen {
             if showCategoriesRow {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 10) {
+
+                        Button {
+                            selectedCategory = nil
+                            viewModel.searchNearby(category: nil)
+                            viewModel.filterBySearch(text: searchText)
+                        } label: {
+                            Text(L("الكل", "All"))
+                                .padding(.vertical, 6)
+                                .padding(.horizontal, 12)
+                                .background(
+                                    selectedCategory == nil
+                                    ? Color.blue.opacity(0.18)
+                                    : Color(.systemGray6)
+                                )
+                                .cornerRadius(10)
+                        }
+
                         ForEach(PlaceCategory.allCases) { category in
                             Button {
                                 selectedCategory = category
-                                viewModel.searchNearby(category: category)
-                                viewModel.filterBySearch(text: searchText)
+
+                                let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                                if !q.isEmpty {
+                                    submitSearch()
+                                } else {
+                                    viewModel.searchNearby(category: category)
+                                    viewModel.filterBySearch(text: searchText)
+                                }
                             } label: {
                                 Text(category.displayName)
                                     .padding(.vertical, 6)
@@ -195,23 +280,25 @@ private extension MapScreen {
         }
     }
 
-    // Map
+    // ✅ Map (الخطوة 3: ضغط على pin يفتح Sheet)
     var mapView: some View {
         Map(
             coordinateRegion: $viewModel.region,
             annotationItems: viewModel.filteredPlaces
         ) { place in
             MapAnnotation(coordinate: place.coordinate) {
-                VStack {
-                    Text(place.category.emoji)
-                    Circle()
-                        .fill(place.category.mapColor)
-                        .frame(width: 8, height: 8)
-                }
-                .onTapGesture {
+                Button {
                     selectedPlace = place
                     viewModel.focus(on: place)
+                } label: {
+                    VStack(spacing: 4) {
+                        Text(place.category.emoji)
+                        Circle()
+                            .fill(place.category.mapColor)
+                            .frame(width: 8, height: 8)
+                    }
                 }
+                .buttonStyle(.plain)
             }
         }
         .frame(height: 280)
@@ -219,7 +306,7 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // Results
+    // ✅ Results (ضغط يفتح نفس Sheet)
     var resultsList: some View {
         VStack(spacing: 0) {
             ForEach(viewModel.filteredPlaces) { place in
@@ -235,7 +322,7 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // Ads
+    // ✅ Ads Placeholder
     var topAdsSection: some View {
         Text(L("إعلانات مميزة", "Featured Ads"))
             .frame(maxWidth: .infinity, minHeight: 100)

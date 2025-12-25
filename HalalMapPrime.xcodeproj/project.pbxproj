@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		15109F8D2EFD62510068DFE3 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15109F8C2EFD62510068DFE3 /* AppRouter.swift */; };
+		15109F9A2EFD82B90068DFE3 /* PlaceDetailsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15109F992EFD82B90068DFE3 /* PlaceDetailsSheet.swift */; };
 		151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E12EE521030065F10C /* AppLanguage.swift */; };
 		151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E32EE5223D0065F10C /* LanguageManager.swift */; };
 		151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E52EE522760065F10C /* LanguageSelectionView.swift */; };
@@ -52,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		15109F8C2EFD62510068DFE3 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
+		15109F992EFD82B90068DFE3 /* PlaceDetailsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceDetailsSheet.swift; sourceTree = SOURCE_ROOT; };
 		151BD9E12EE521030065F10C /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLanguage.swift; path = views/AppLanguage.swift; sourceTree = SOURCE_ROOT; };
 		151BD9E32EE5223D0065F10C /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		151BD9E52EE522760065F10C /* LanguageSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionView.swift; sourceTree = "<group>"; };
@@ -88,6 +90,11 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		15109F932EFD807D0068DFE3 /* helpers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = helpers;
+			sourceTree = "<group>";
+		};
 		15A0D7752EE055040063ED79 /* HalalMapPrime */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = HalalMapPrime;
@@ -120,7 +127,6 @@
 				151BD9E12EE521030065F10C /* AppLanguage.swift */,
 				151BD9E32EE5223D0065F10C /* LanguageManager.swift */,
 				151BD9E52EE522760065F10C /* LanguageSelectionView.swift */,
-				151BD9EB2EE596C00065F10C /* ADS */,
 			);
 			path = language;
 			sourceTree = "<group>";
@@ -129,13 +135,14 @@
 			isa = PBXGroup;
 			children = (
 				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
+				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
 				151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */,
 				151BD9F02EE597570065F10C /* FreeAdFormView.swift */,
 				151BD9F22EE597800065F10C /* MyAdsView.swift */,
 				15683DDE2EE701270011A09F /* JobAdComposerViewswift.swift */,
 				15CEB1F52EE78A810035A83D /* EventAdsService.swift */,
 				15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */,
-				15109F8C2EFD62510068DFE3 /* AppRouter.swift */,
+				15CEB2092EE7CC780035A83D /* EventAdsBoardView.swift */,
 			);
 			path = ADS;
 			sourceTree = "<group>";
@@ -143,13 +150,16 @@
 		15A0D76A2EE055040063ED79 = {
 			isa = PBXGroup;
 			children = (
-				15C0B4BE2EFCA1F500532F0F /* 	Managers */,
 				15A0D7A32EE0BBD90063ED79 /* GoogleService-Info.plist */,
-				15A0D78A2EE05CC30063ED79 /* models */,
+				15A0D7752EE055040063ED79 /* HalalMapPrime */,
+				15C0B4BE2EFCA1F500532F0F /* 	Managers */,
+				151BD9EB2EE596C00065F10C /* ADS */,
 				15A0D7832EE059E60063ED79 /* services */,
+				151BD9E02EE520AA0065F10C /* language */,
+				15109F932EFD807D0068DFE3 /* helpers */,
+				15A0D78A2EE05CC30063ED79 /* models */,
 				15A0D7822EE059C90063ED79 /* viewmodels */,
 				15A0D7812EE059A10063ED79 /* views */,
-				15A0D7752EE055040063ED79 /* HalalMapPrime */,
 				15A0D7742EE055040063ED79 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -203,9 +213,8 @@
 			children = (
 				15A0D7A12EE07FE90063ED79 /* samplePlaces.swift */,
 				15A0D7912EE05E4C0063ED79 /* PrayerTime.swift */,
-				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
 				15E1626E2EE121DC00A5C42C /* Place.swift */,
-				151BD9E02EE520AA0065F10C /* language */,
+				15109F992EFD82B90068DFE3 /* PlaceDetailsSheet.swift */,
 			);
 			path = models;
 			sourceTree = "<group>";
@@ -213,7 +222,7 @@
 		15C0B4BE2EFCA1F500532F0F /* 	Managers */ = {
 			isa = PBXGroup;
 			children = (
-				15CEB2092EE7CC780035A83D /* EventAdsBoardView.swift */,
+				15109F8C2EFD62510068DFE3 /* AppRouter.swift */,
 				15C0B4BF2EFCA2FC00532F0F /* AppLocationManager .swift */,
 			);
 			path = "\tManagers";
@@ -235,6 +244,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				15109F932EFD807D0068DFE3 /* helpers */,
 				15A0D7752EE055040063ED79 /* HalalMapPrime */,
 			);
 			name = HalalMapPrime;
@@ -333,6 +343,7 @@
 				15C0B4BD2EFC8FC200532F0F /* LocationPermissionView.swift in Sources */,
 				15C0B4C02EFCA2FC00532F0F /* AppLocationManager .swift in Sources */,
 				15E1624A2EE0D5D600A5C42C /* MapScreenViewModel.swift in Sources */,
+				15109F9A2EFD82B90068DFE3 /* PlaceDetailsSheet.swift in Sources */,
 				151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */,
 				151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */,
 				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,
