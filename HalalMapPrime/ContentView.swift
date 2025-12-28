@@ -1,3 +1,10 @@
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Updated by Zaid Nahleh on 2025-12-27.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
 struct ContentView: View {

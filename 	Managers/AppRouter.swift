@@ -34,7 +34,15 @@ final class AppRouter: ObservableObject {
         case paidPlans     // open SelectAdPlanView
         case jobsBoard     // open JobAdsBoardView
     }
+    
+    // ✅ Map DeepLink (new)
+    @Published var pendingMapCategory: PlaceCategory? = nil
 
+    func openMap(category: PlaceCategory?) {
+        pendingMapCategory = category
+        selectedTab = 0
+    }
+    
     @Published var pendingAdsEntry: AdsEntry? = nil
 
     func openAds(_ entry: AdsEntry = .home) {

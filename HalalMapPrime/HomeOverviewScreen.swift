@@ -11,6 +11,7 @@
 import SwiftUI
 import FirebaseFirestore
 import Combine
+
 struct HomeOverviewScreen: View {
 
     @EnvironmentObject var lang: LanguageManager
@@ -26,6 +27,10 @@ struct HomeOverviewScreen: View {
     // Distance UI (visual فقط الآن)
     @State private var radiusMiles: Int = 5
     @State private var showDistancePicker: Bool = false
+
+    // ✅ NEW: فتح الخريطة من الصفحة الرئيسية
+    @State private var showMapSheet: Bool = false
+    @State private var mapCategoryToOpen: PlaceCategory? = nil
 
     private let tickerTimer = Timer.publish(every: 6, on: .main, in: .common).autoconnect()
 
@@ -59,6 +64,12 @@ struct HomeOverviewScreen: View {
         }
         .sheet(isPresented: $showDistancePicker) {
             distanceSheet
+        }
+        // ✅ NEW: Sheet للخريطة مباشرة مع category
+        .sheet(isPresented: $showMapSheet) {
+            MapScreen(startingCategory: mapCategoryToOpen, hideCategoryPicker: false)
+                .environmentObject(lang)
+                .environmentObject(router)
         }
     }
 
@@ -132,10 +143,12 @@ struct HomeOverviewScreen: View {
         }
     }
 
-    /// حاليا: بيرجع للخريطة (Tab 0). ربط فلترة الخريطة بنعمله بعد ما تبعت MapScreen.
+    /// ✅ FIX: بدل ما يعمل router.selectedTab = 0 (يرجع لنفس الصفحة)
+    /// الآن يفتح الخريطة فوراً (Sheet) مع التصنيف
     private func openCategory(_ category: PlaceCategory) {
-        router.selectedTab = 0
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        mapCategoryToOpen = category
+        showMapSheet = true
     }
 
     // MARK: - Jobs Header
@@ -238,8 +251,6 @@ struct HomeOverviewScreen: View {
                         }
 
                         VStack(alignment: .leading, spacing: 2) {
-
-                            // “headline” للقديم = category + جزء بسيط من النص
                             Text(headlineForOldAd(ad))
                                 .font(.subheadline.weight(.semibold))
                                 .lineLimit(1)
@@ -267,8 +278,6 @@ struct HomeOverviewScreen: View {
     }
 
     private func headlineForOldAd(_ ad: JobAd) -> String {
-        // أعطي عنوان نظيف بدون كلام كثير
-        // مثال: "Cashier • Restaurant" أو "Driver • Brooklyn"
         let cat = ad.category.trimmingCharacters(in: .whitespacesAndNewlines)
         let text = ad.text.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -342,7 +351,6 @@ struct HomeOverviewScreen: View {
                         Button {
                             radiusMiles = miles
                             showDistancePicker = false
-                            // لاحقاً: نطبق فلترة حسب Location حقيقية
                         } label: {
                             HStack {
                                 Text("\(miles) mi").font(.headline)
@@ -387,10 +395,8 @@ struct HomeOverviewScreen: View {
                         return
                     }
 
-                    // JobAd القديم عندك init?(from: DocumentSnapshot)
                     let all = docs.compactMap { JobAd(from: $0) }
 
-                    // ترتيب: الأحدث أولاً
                     self.previewJobs = all.sorted {
                         ($0.createdAt ?? .distantPast) > ($1.createdAt ?? .distantPast)
                     }

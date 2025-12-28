@@ -14,6 +14,7 @@ struct MapScreen: View {
 
     // MARK: - Environment & State
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var router: AppRouter     // ✅ NEW
     @StateObject private var viewModel = MapScreenViewModel()
 
     let startingCategory: PlaceCategory?
@@ -23,12 +24,12 @@ struct MapScreen: View {
     @State private var searchText: String = ""
     @State private var showResults: Bool = true
 
-    // ✅ الخطوة 3: المكان المختار للـ Sheet
+    // ✅ Bottom Sheet تفاصيل المكان
     @State private var selectedPlace: Place? = nil
 
     @State private var showCategoriesRow: Bool = false
 
-    // ✅ للـ UX: وقت يشتغل Search حقيقي
+    // ✅ UX: وقت يشتغل Search
     @State private var isSearching: Bool = false
     @State private var lastSubmittedQuery: String = ""
 
@@ -69,7 +70,7 @@ struct MapScreen: View {
         }
         .scrollDismissesKeyboard(.interactively)
 
-        // ✅ الخطوة 3: Bottom Sheet تفاصيل المكان
+        // ✅ Bottom Sheet تفاصيل المكان
         .sheet(item: $selectedPlace) { place in
             PlaceDetailsSheet(place: place)
                 .environmentObject(lang)
@@ -77,15 +78,33 @@ struct MapScreen: View {
         }
 
         .onAppear {
+            // 1) لو في DeepLink جاهز للخريطة → طبّقه فوراً
+            if let deepCat = router.pendingMapCategory {
+                selectedCategory = deepCat
+                viewModel.searchNearby(category: deepCat)
+                viewModel.filterBySearch(text: searchText)
+                router.pendingMapCategory = nil
+                return
+            }
+
+            // 2) لو الشاشة انفتحت بـ startingCategory
             if let startingCategory {
                 selectedCategory = startingCategory
-                // ✅ أول تحميل: جلب قريب
                 viewModel.searchNearby(category: startingCategory)
                 viewModel.filterBySearch(text: searchText)
             } else {
-                // ✅ لو ما في startingCategory: اعمل جلب عام (اختياري)
+                // 3) افتراضي: nearby عام
                 viewModel.searchNearby(category: nil)
             }
+        }
+
+        // ✅ إذا إجالك DeepLink لاحقاً وانت على نفس الصفحة
+        .onChange(of: router.pendingMapCategory) { newCat in
+            guard let c = newCat else { return }
+            selectedCategory = c
+            viewModel.searchNearby(category: c)
+            viewModel.filterBySearch(text: searchText)
+            router.pendingMapCategory = nil
         }
     }
 }
@@ -280,7 +299,7 @@ private extension MapScreen {
         }
     }
 
-    // ✅ Map (الخطوة 3: ضغط على pin يفتح Sheet)
+    // ✅ Map
     var mapView: some View {
         Map(
             coordinateRegion: $viewModel.region,
@@ -306,7 +325,7 @@ private extension MapScreen {
         .padding(.horizontal)
     }
 
-    // ✅ Results (ضغط يفتح نفس Sheet)
+    // ✅ Results
     var resultsList: some View {
         VStack(spacing: 0) {
             ForEach(viewModel.filteredPlaces) { place in

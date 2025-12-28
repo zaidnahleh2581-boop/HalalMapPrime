@@ -20,12 +20,12 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
 
-            // 0) Home
+            // 0) Map (Main)
             NavigationStack {
-                HomeOverviewScreen()
+                MapScreen()
             }
             .tabItem {
-                Label(L("الرئيسية", "Home"), systemImage: "house.fill")
+                Label(L("الخريطة", "Map"), systemImage: "map.fill")
             }
             .tag(0)
 
@@ -47,19 +47,18 @@ struct MainTabView: View {
             }
             .tag(2)
 
-            // 3) Community
+            // 3) Community ✅
             NavigationStack {
-                HomeLiveFeedScreen()
+                CommunityHubScreen()
             }
             .tabItem {
                 Label(L("مجتمع", "Community"), systemImage: "person.3.fill")
             }
             .tag(3)
 
-            // 4) Faith
+            // 4) Faith ✅
             NavigationStack {
-                // ضع شاشة الإيمان عندك هنا (إذا عندك FaithHomeScreen بدلها)
-                HomeLiveFeedScreen()
+                FaithToolsScreen()
             }
             .tabItem {
                 Label(L("إيمان", "Faith"), systemImage: "moon.stars.fill")
