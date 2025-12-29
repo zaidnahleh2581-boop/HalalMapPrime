@@ -20,7 +20,7 @@ struct MainTabView: View {
     var body: some View {
         TabView(selection: $router.selectedTab) {
 
-            // 0) Home (Main)
+            // 0) Home
             NavigationStack {
                 HomeOverviewScreen()
             }
@@ -29,9 +29,9 @@ struct MainTabView: View {
             }
             .tag(0)
 
-            // 1) Jobs
+            // 1) Jobs ✅ Legacy board only (no confusion)
             NavigationStack {
-                JobAdsScreen()
+                JobAdsBoardView()
             }
             .tabItem {
                 Label(L("وظائف", "Jobs"), systemImage: "briefcase.fill")

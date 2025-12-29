@@ -1,3 +1,13 @@
+//
+//  jobLegacyBoard.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-23.
+//  Updated by Zaid Nahleh on 2025-12-29.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 import FirebaseFirestore
 import Combine
@@ -44,6 +54,7 @@ struct JobAd: Identifiable {
         self.city = data["city"] as? String ?? ""
         self.category = data["category"] as? String ?? ""
         self.phone = data["phone"] as? String ?? ""
+
         if let ts = data["createdAt"] as? Timestamp {
             self.createdAt = ts.dateValue()
         } else {
@@ -62,9 +73,8 @@ final class JobAdsBoardViewModel: ObservableObject {
     private var listener: ListenerRegistration?
 
     init() {
-        // استنى لحد ما الـ ViewModel يكتمل بعدين اسمع من Firestore
-        DispatchQueue.main.async {
-            self.startListening()
+        DispatchQueue.main.async { [weak self] in
+            self?.startListening()
         }
     }
 
@@ -85,9 +95,7 @@ final class JobAdsBoardViewModel: ObservableObject {
                 }
 
                 guard let docs = snapshot?.documents else {
-                    DispatchQueue.main.async {
-                        self.jobAds = []
-                    }
+                    DispatchQueue.main.async { self.jobAds = [] }
                     return
                 }
 
@@ -150,9 +158,9 @@ struct JobAdComposerView: View {
         "Grocery store"
     ]
 
-    private var categories: [String] {
-        lang.isArabic ? categoriesAr : categoriesEn
-    }
+    private var categories: [String] { lang.isArabic ? categoriesAr : categoriesEn }
+
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
     private var generatedText: String {
         let safeName = name.isEmpty ? (lang.isArabic ? "الاسم" : "Name") : name
@@ -184,15 +192,10 @@ struct JobAdComposerView: View {
         !selectedCategory.isEmpty
     }
 
-    private func L(_ ar: String, _ en: String) -> String {
-        lang.isArabic ? ar : en
-    }
-
     var body: some View {
         NavigationStack {
             Form {
 
-                // نوع الإعلان
                 Section(header: Text(L("نوع الإعلان", "Ad type"))) {
                     Picker("", selection: $adType) {
                         Text(L("أبحث عن عمل", "Looking for a job"))
@@ -203,7 +206,6 @@ struct JobAdComposerView: View {
                     .pickerStyle(.segmented)
                 }
 
-                // بيانات أساسية
                 Section(header: Text(L("البيانات الأساسية", "Basic info"))) {
                     TextField(L("الاسم (مثال: محمد)", "Name (e.g. Mohamed)"), text: $name)
 
@@ -212,14 +214,10 @@ struct JobAdComposerView: View {
                         text: $city
                     )
 
-                    TextField(
-                        L("رقم الهاتف", "Phone number"),
-                        text: $phone
-                    )
-                    .keyboardType(.phonePad)
+                    TextField(L("رقم الهاتف", "Phone number"), text: $phone)
+                        .keyboardType(.phonePad)
                 }
 
-                // نوع المكان / المجال
                 Section(header: Text(L("نوع المكان", "Place type"))) {
                     Picker(L("اختر المجال", "Select category"), selection: $selectedCategory) {
                         ForEach(categories, id: \.self) { cat in
@@ -228,7 +226,6 @@ struct JobAdComposerView: View {
                     }
                 }
 
-                // نص الإعلان النهائي
                 Section(header: Text(L("نص الإعلان النهائي", "Final ad text"))) {
                     Text(generatedText)
                         .font(.body)
@@ -236,15 +233,12 @@ struct JobAdComposerView: View {
                         .padding(.vertical, 4)
                 }
 
-                // زر "نشر الإعلان"
                 Section {
                     Button {
                         submitToFirebase()
                     } label: {
                         HStack {
-                            if isSubmitting {
-                                ProgressView()
-                            }
+                            if isSubmitting { ProgressView() }
                             Text(L("نشر الإعلان", "Publish ad"))
                                 .frame(maxWidth: .infinity)
                         }
@@ -264,11 +258,8 @@ struct JobAdComposerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .imageScale(.medium)
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark").imageScale(.medium)
                     }
                 }
             }
@@ -303,31 +294,24 @@ struct JobAdComposerView: View {
     }
 }
 
-// MARK: - شاشة عرض إعلانات الوظائف (JobAdsBoardView)
+// MARK: - شاشة عرض إعلانات الوظائف (القديمة الواضحة)
 
 struct JobAdsBoardView: View {
 
     @EnvironmentObject var lang: LanguageManager
-    @Environment(\.dismiss) private var dismiss
 
     @StateObject private var viewModel = JobAdsBoardViewModel()
-
     @State private var showComposer: Bool = false
     @State private var selectedFilter: JobAdFilter = .all
 
-    private func L(_ ar: String, _ en: String) -> String {
-        lang.isArabic ? ar : en
-    }
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
     private var filteredAds: [JobAd] {
         viewModel.jobAds.filter { ad in
             switch selectedFilter {
-            case .all:
-                return true
-            case .lookingForJob:
-                return ad.type == .lookingForJob
-            case .hiring:
-                return ad.type == .hiring
+            case .all: return true
+            case .lookingForJob: return ad.type == .lookingForJob
+            case .hiring: return ad.type == .hiring
             }
         }
     }
@@ -342,8 +326,8 @@ struct JobAdsBoardView: View {
     var body: some View {
         NavigationStack {
             List {
-
                 Section(header: Text(L("إعلانات الوظائف", "Job ads"))) {
+
                     Picker(L("فلتر", "Filter"), selection: $selectedFilter) {
                         Text(L("الكل", "All")).tag(JobAdFilter.all)
                         Text(L("أبحث عن عمل", "Looking for job")).tag(JobAdFilter.lookingForJob)
@@ -362,28 +346,15 @@ struct JobAdsBoardView: View {
                     }
                 }
             }
-            .navigationTitle(L("إعلانات الوظائف", "Job ads"))
+            .navigationTitle(L("وظائف", "Jobs"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .imageScale(.medium)
-                    }
-                }
-
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showComposer = true
-                    } label: {
+                    Button { showComposer = true } label: {
                         Image(systemName: "plus.circle.fill")
                             .imageScale(.large)
                     }
-                    .accessibilityLabel(
-                        L("إضافة إعلان وظيفة", "Add job ad")
-                    )
+                    .accessibilityLabel(L("إضافة إعلان وظيفة", "Add job ad"))
                 }
             }
             .sheet(isPresented: $showComposer) {
