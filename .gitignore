@@ -9,3 +9,5 @@ xcuserdata/
 # SwiftPM
 .build/
 .swiftpm/xcode/package.xcworkspace/xcuserdata/
+*.xcuserstate
+xcuserdata/
