@@ -4,6 +4,7 @@
 //
 //  Created by Zaid Nahleh on 2025-12-23.
 //  Updated by Zaid Nahleh on 2025-12-25.
+//  Updated by ChatGPT on 2025-12-29.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -21,7 +22,7 @@ struct HomeCategoriesGrid: View {
 
     private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
-    // ✅ Primary core categories (always visible) - includes Mosques
+    // ✅ Primary core categories (always visible)
     private var primary: [PlaceCategory] {
         [.restaurant, .foodTruck, .grocery, .mosque]
     }
@@ -64,18 +65,33 @@ struct HomeCategoriesGrid: View {
             }
             .padding(.horizontal)
 
-            // ✅ Yelp-like primary row (small chips)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(primary) { category in
-                        chip(category: category) {
-                            onSelect(category)
+            // ✅ Primary row (icons only) — centered & evenly spaced (NO words)
+            HStack {
+                Spacer(minLength: 0)
+
+                ForEach(primary) { category in
+                    Button {
+                        onSelect(category)
+                    } label: {
+                        ZStack {
+                            Circle()
+                                .fill(accent(for: category).opacity(0.18))
+                                .frame(width: 56, height: 56) // ✅ واضح وكبير
+
+                            Image(systemName: icon(for: category))
+                                .font(.system(size: 26, weight: .bold))
+                                .foregroundColor(accent(for: category))
                         }
+                        .frame(width: 72) // ✅ يمنع الصغر/التكدس ويخلي التوزيع ثابت
+                        .contentShape(Rectangle())
                     }
+                    .buttonStyle(.plain)
                 }
-                .padding(.horizontal)
-                .padding(.bottom, 2)
+
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal)
+            .padding(.bottom, 4)
         }
         .sheet(isPresented: $showMoreSheet) {
             NavigationStack {
@@ -109,35 +125,6 @@ struct HomeCategoriesGrid: View {
                 }
             }
         }
-    }
-
-    // MARK: - Yelp-like chip
-
-    private func chip(category: PlaceCategory, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(accent(for: category).opacity(0.15))
-                        .frame(width: 34, height: 34)
-
-                    Image(systemName: icon(for: category))
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(accent(for: category))
-                }
-
-                Text(title(for: category))
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-            }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 12)
-            .background(Color(.systemBackground))
-            .cornerRadius(999)
-            .shadow(color: Color.black.opacity(0.06), radius: 4, x: 0, y: 2)
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Sheet cards
