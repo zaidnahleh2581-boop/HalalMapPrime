@@ -23,6 +23,11 @@
 		153BA5DF2F0490D7000D22FD /* MyPlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */; };
 		153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */; };
 		153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */; };
+		153BA5EB2F052E07000D22FD /* MarqueeText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5EA2F052E07000D22FD /* MarqueeText.swift */; };
+		153BA5ED2F052E31000D22FD /* HomeEventsTickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5EC2F052E31000D22FD /* HomeEventsTickerView.swift */; };
+		153BA5EF2F0531DB000D22FD /* CoreEventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5EE2F0531DB000D22FD /* CoreEventCategory.swift */; };
+		153BA5F12F0532C5000D22FD /* MyEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5F02F0532C5000D22FD /* MyEventsView.swift */; };
+		153BA5F32F0532E8000D22FD /* MyEventsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5F22F0532E8000D22FD /* MyEventsViewModel.swift */; };
 		156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156016582F032F3D00ABC8BB /* EventTemplate.swift */; };
 		1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165A2F032F6F00ABC8BB /* ContactUsView.swift */; };
 		1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */; };
@@ -88,6 +93,11 @@
 		153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPlacesStore.swift; sourceTree = "<group>"; };
 		153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlacesStore.swift; sourceTree = "<group>"; };
 		153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyFreeGate.swift; sourceTree = "<group>"; };
+		153BA5EA2F052E07000D22FD /* MarqueeText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarqueeText.swift; sourceTree = "<group>"; };
+		153BA5EC2F052E31000D22FD /* HomeEventsTickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeEventsTickerView.swift; sourceTree = "<group>"; };
+		153BA5EE2F0531DB000D22FD /* CoreEventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreEventCategory.swift; sourceTree = "<group>"; };
+		153BA5F02F0532C5000D22FD /* MyEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyEventsView.swift; sourceTree = "<group>"; };
+		153BA5F22F0532E8000D22FD /* MyEventsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyEventsViewModel.swift; sourceTree = "<group>"; };
 		156016582F032F3D00ABC8BB /* EventTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTemplate.swift; sourceTree = "<group>"; };
 		1560165A2F032F6F00ABC8BB /* ContactUsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsView.swift; sourceTree = "<group>"; };
 		1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -223,6 +233,11 @@
 				15CEB2092EE7CC780035A83D /* EventAdsBoardView.swift */,
 				1560165E2F03305000ABC8BB /* EventAdsBoardViewModel.swift */,
 				15CEB1F52EE78A810035A83D /* EventAdsService.swift */,
+				153BA5EA2F052E07000D22FD /* MarqueeText.swift */,
+				153BA5EC2F052E31000D22FD /* HomeEventsTickerView.swift */,
+				153BA5EE2F0531DB000D22FD /* CoreEventCategory.swift */,
+				153BA5F02F0532C5000D22FD /* MyEventsView.swift */,
+				153BA5F22F0532E8000D22FD /* MyEventsViewModel.swift */,
 			);
 			path = Community;
 			sourceTree = "<group>";
@@ -409,6 +424,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				153BA5F12F0532C5000D22FD /* MyEventsView.swift in Sources */,
 				156A32422F00940E00819D25 /* AddPlaceCategory.swift in Sources */,
 				15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */,
 				151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */,
@@ -431,9 +447,11 @@
 				15E162482EE0D50500A5C42C /* GooglePlacesService.swift in Sources */,
 				15B3D4C12EFDB6F800704BB6 /* RamadanImsakiyahViewModel.swift in Sources */,
 				151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */,
+				153BA5ED2F052E31000D22FD /* HomeEventsTickerView.swift in Sources */,
 				153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */,
 				153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */,
 				156A32362F00940E00819D25 /* CommunityHubScreen.swift in Sources */,
+				153BA5EB2F052E07000D22FD /* MarqueeText.swift in Sources */,
 				15B3D4C32EFDB7B900704BB6 /* FaithPlaceholders.swift in Sources */,
 				156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */,
 				15B3D4BB2EFDAF6C00704BB6 /* PrayerTimesViewModel.swift in Sources */,
@@ -459,7 +477,9 @@
 				151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */,
 				15B3D4C52EFDB94500704BB6 /* QiblaCompassViewModel.swift in Sources */,
 				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,
+				153BA5F32F0532E8000D22FD /* MyEventsViewModel.swift in Sources */,
 				15A0D79E2EE0626B0063ED79 /* AddStoreScreen.swift in Sources */,
+				153BA5EF2F0531DB000D22FD /* CoreEventCategory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -594,6 +614,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = HalalMapPrime/Assets.xcassets;
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -627,6 +648,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = HalalMapPrime/Assets.xcassets;
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

@@ -51,7 +51,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../&#9;Managers/HMP.storekit">
+         identifier = "../../&#9;Managers/StoreKit 2/HMP.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

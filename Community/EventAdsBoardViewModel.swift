@@ -3,6 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-29.
+//  Updated by Zaid Nahleh on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -15,7 +16,7 @@ import FirebaseFirestore
 @MainActor
 final class EventAdsBoardViewModel: ObservableObject {
 
-    @Published var events: [EventAd] = []
+    @Published private(set) var events: [EventAd] = []
     @Published var isLoading: Bool = true
     @Published var errorMessage: String? = nil
 
@@ -47,13 +48,17 @@ final class EventAdsBoardViewModel: ObservableObject {
         }
     }
 
+    func filteredEvents(for category: CoreEventCategory) -> [EventAd] {
+        // Filter by core category mapping (no DB changes)
+        let base = events.filter { $0.deletedAt == nil }
+        return base.filter { category.matches(event: $0) }
+    }
+
     func isOwner(_ ad: EventAd) -> Bool {
         Auth.auth().currentUser?.uid == ad.ownerId
     }
 
     func delete(_ ad: EventAd) {
-        // ✅ الأمان الحقيقي: لازم الـ Rules تمنع غير صاحب الإعلان
-        // لذلك بنمرر ownerId للخدمة (والخدمة تعمل تحقق + الـ Rules تعمل enforce)
         EventAdsService.shared.softDeleteEventAd(
             adId: ad.id,
             ownerId: ad.ownerId
@@ -79,7 +84,6 @@ final class EventAdsBoardViewModel: ObservableObject {
             return "ليس لديك صلاحية لهذه العملية. تأكد أنك نفس المستخدم الذي أنشأ الإعلان."
         }
 
-        // Firestore sometimes returns "requires an index"
         if msg.contains("requires an index") {
             return "الاستعلام يحتاج Index في Firestore. افتح رابط الـ Index من الكونسول وأنشئه."
         }

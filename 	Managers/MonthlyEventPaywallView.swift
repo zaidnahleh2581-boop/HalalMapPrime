@@ -3,6 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-30.
+//  Updated by ChatGPT on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -15,6 +16,7 @@ struct MonthlyEventPaywallView: View {
     @EnvironmentObject var lang: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
+    /// Callback بعد الدفع الناجح
     var onPaid: (String) -> Void
 
     @StateObject private var iap = IAPManager.shared
@@ -22,86 +24,119 @@ struct MonthlyEventPaywallView: View {
     @State private var isBuying: Bool = false
     @State private var errorMessage: String? = nil
 
-    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
+    private func L(_ ar: String, _ en: String) -> String {
+        lang.isArabic ? ar : en
+    }
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 14) {
+            ScrollView {
+                VStack(spacing: 18) {
 
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 34))
-                    .foregroundColor(.orange)
+                    // ✅ Banner Image (from Assets)
+                    Image("paid_event_banner")
+                        .resizable()
+                        .scaledToFit()
+                        .cornerRadius(18)
+                        .padding(.horizontal)
+                        .padding(.top, 8)
 
-                Text(L("لقد استخدمت الإعلان المجاني لهذا الشهر", "You already used your free monthly post"))
+                    // 🔒 Lock icon
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(.orange)
+                        .padding(.top, 4)
+
+                    // Title
+                    Text(L(
+                        "لقد استخدمت الإعلان المجاني لهذا الشهر",
+                        "You already used your free monthly post"
+                    ))
                     .font(.headline)
                     .multilineTextAlignment(.center)
 
-                Text(L(
-                    "يمكنك دفع ثمن هذا الإعلان لنشره الآن.",
-                    "You can pay to publish this post now."
-                ))
-                .font(.footnote)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
+                    // Subtitle
+                    Text(L(
+                        "يمكنك ترقية هذا الإعلان ونشره فوراً ليظهر للمستخدمين.",
+                        "You can upgrade this post and publish it immediately to users."
+                    ))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
 
-                if let p = iap.eventPostProduct {
-                    Text(L("السعر", "Price") + ": " + p.displayPrice)
-                        .font(.subheadline.weight(.semibold))
-                        .padding(.top, 4)
-                } else {
-                    ProgressView()
-                        .padding(.top, 4)
-                }
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.footnote)
-                        .foregroundColor(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 6)
-                }
-
-                VStack(spacing: 10) {
-                    Button {
-                        Task { await buy() }
-                    } label: {
-                        HStack {
-                            if isBuying { ProgressView() }
-                            Text(L("ادفع وانشر الآن", "Pay & Publish Now"))
-                                .frame(maxWidth: .infinity)
+                    // Price
+                    Group {
+                        if let product = iap.eventPostProduct {
+                            Text(L("السعر", "Price") + ": " + product.displayPrice)
+                                .font(.subheadline.weight(.semibold))
+                        } else {
+                            ProgressView()
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(isBuying)
+                    .padding(.top, 6)
 
-                    Button(role: .cancel) { dismiss() } label: {
-                        Text(L("إلغاء", "Cancel"))
-                            .frame(maxWidth: .infinity)
+                    // Error
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 6)
                     }
-                    .buttonStyle(.bordered)
-                    .disabled(isBuying)
-                }
-                .padding(.top, 6)
 
-                Spacer()
+                    // Buttons
+                    VStack(spacing: 12) {
+
+                        Button {
+                            Task { await buy() }
+                        } label: {
+                            HStack {
+                                if isBuying {
+                                    ProgressView()
+                                }
+                                Text(L("ادفع وانشر الآن", "Pay & Publish Now"))
+                                    .frame(maxWidth: .infinity)
+                            }
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isBuying || iap.eventPostProduct == nil)
+
+                        Button(role: .cancel) {
+                            dismiss()
+                        } label: {
+                            Text(L("إلغاء", "Cancel"))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(isBuying)
+                    }
+                    .padding(.top, 8)
+
+                    Spacer(minLength: 20)
+                }
+                .padding()
             }
-            .padding()
             .navigationTitle(L("ترقية الإعلان", "Upgrade Post"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark").imageScale(.medium)
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .imageScale(.medium)
                     }
                     .disabled(isBuying)
                 }
             }
             .task {
-                // تحميل المنتج عند فتح الشاشة
+                // تحميل منتجات StoreKit عند فتح الشاشة
                 await iap.loadProducts()
             }
         }
     }
+
+    // MARK: - Purchase
 
     @MainActor
     private func buy() async {

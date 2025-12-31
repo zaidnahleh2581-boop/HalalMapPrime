@@ -3,7 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-23.
-//  Updated by Zaid Nahleh on 2025-12-29.
+//  Updated by Zaid Nahleh on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -36,7 +36,7 @@ struct HomeOverviewScreen: View {
     @State private var showMapSheet: Bool = false
     @State private var mapStartingCategory: PlaceCategory? = nil
 
-    // Ticker changes every 60 seconds
+    // Jobs ticker changes every 60 seconds (keep as is)
     private let tickerTimer = Timer.publish(every: 60, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -53,6 +53,13 @@ struct HomeOverviewScreen: View {
 
                 // 3) Core: One job ticker (changes every minute)
                 jobsTicker
+
+                // ✅ 3.5) NEW: Events ticker (PAID ONLY) – opens Community
+                HomeEventsTickerView()
+                    .environmentObject(lang)
+                    .environmentObject(router)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 2)
 
                 // 4) Paid Ads (placeholder UI for now)
                 paidAdsSection

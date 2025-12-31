@@ -3,6 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-29.
+//  Updated by Zaid Nahleh on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -13,6 +14,8 @@ struct EventAdsBoardView: View {
 
     @EnvironmentObject var lang: LanguageManager
     private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
+
+    let selectedCategory: CoreEventCategory
 
     @StateObject private var vm = EventAdsBoardViewModel()
 
@@ -61,26 +64,15 @@ struct EventAdsBoardView: View {
 
             } else {
                 List {
-                    if vm.events.isEmpty {
-                        VStack(spacing: 10) {
-                            Image(systemName: "calendar.badge.plus")
-                                .font(.system(size: 40))
-                                .foregroundColor(.blue.opacity(0.85))
+                    // ✅ Filtered list based on selectedCategory
+                    let items = vm.filteredEvents(for: selectedCategory)
 
-                            Text(L(
-                                "لا توجد فعاليات قادمة.\nاضغط زر (أضف) لإضافة أول فعالية.",
-                                "No upcoming events.\nTap (Add) to post the first event."
-                            ))
-                            .multilineTextAlignment(.center)
-                            .foregroundColor(.secondary)
-                            .padding(.top, 6)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .listRowSeparator(.hidden)
+                    if items.isEmpty {
+                        emptyStateForCategory(selectedCategory)
+                            .listRowSeparator(.hidden)
 
                     } else {
-                        ForEach(vm.events) { ev in
+                        ForEach(items) { ev in
                             VStack(alignment: .leading, spacing: 6) {
 
                                 HStack {
@@ -110,6 +102,18 @@ struct EventAdsBoardView: View {
                                     }
                                     .font(.footnote)
                                     .foregroundColor(.secondary)
+                                }
+
+                                // Optional badge for paid
+                                if ev.tier.lowercased() == "paid" {
+                                    Text(L("مميز", "Featured"))
+                                        .font(.caption2.weight(.bold))
+                                        .foregroundColor(.white)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Color.black.opacity(0.78))
+                                        .clipShape(Capsule())
+                                        .padding(.top, 4)
                                 }
                             }
                             .padding(.vertical, 8)
@@ -143,5 +147,28 @@ struct EventAdsBoardView: View {
                     .environmentObject(lang)
             }
         }
+    }
+
+    private func emptyStateForCategory(_ cat: CoreEventCategory) -> some View {
+        VStack(spacing: 10) {
+            Image(systemName: "calendar.badge.plus")
+                .font(.system(size: 40))
+                .foregroundColor(.blue.opacity(0.85))
+
+            let title = lang.isArabic ? cat.title.ar : cat.title.en
+            Text(L(
+                "لا توجد فعاليات ضمن هذا القسم الآن.\nاضغط زر (أضف) لإضافة فعالية.",
+                "No events in this category right now.\nTap (Add) to post an event."
+            ))
+            .multilineTextAlignment(.center)
+            .foregroundColor(.secondary)
+            .padding(.top, 6)
+
+            Text(L("القسم: \(title)", "Category: \(title)"))
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
     }
 }

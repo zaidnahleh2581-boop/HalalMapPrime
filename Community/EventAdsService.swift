@@ -3,6 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-30.
+//  Updated by Zaid Nahleh on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -92,6 +93,7 @@ final class EventAdsService {
     private init() {}
 
     // MARK: - Auth Helper (Anonymous)
+
     private func ensureSignedIn(completion: @escaping (Result<String, Error>) -> Void) {
         if let uid = Auth.auth().currentUser?.uid {
             completion(.success(uid))
@@ -116,6 +118,7 @@ final class EventAdsService {
     }
 
     // MARK: - Monthly Gate (consume even if deleted)
+
     private func userDocRef(uid: String) -> DocumentReference {
         db.collection(usersCollection).document(uid)
     }
@@ -139,7 +142,8 @@ final class EventAdsService {
         }
     }
 
-    // MARK: - Observe
+    // MARK: - Observe Upcoming Events (all users)
+
     @discardableResult
     func observeUpcomingEvents(
         completion: @escaping (Result<[EventAd], Error>) -> Void
@@ -164,7 +168,51 @@ final class EventAdsService {
             }
     }
 
+    // MARK: - Observe My Events (owner only) ✅ NO DeferredListener / NO duplicates
+
+    @discardableResult
+    func observeMyEvents(
+        completion: @escaping (Result<[EventAd], Error>) -> Void
+    ) -> ListenerRegistration {
+
+        // ✅ Placeholder listener (valid ListenerRegistration we can return immediately)
+        let placeholder = db.collection(collectionName)
+            .limit(to: 1)
+            .addSnapshotListener { _, _ in }
+
+        ensureSignedIn { [weak self] authResult in
+            guard let self else { return }
+
+            switch authResult {
+            case .failure(let error):
+                completion(.failure(error))
+
+            case .success(let uid):
+                // stop placeholder ASAP
+                placeholder.remove()
+
+                self.db.collection(self.collectionName)
+                    .whereField("ownerId", isEqualTo: uid)
+                    .whereField("deletedAt", isEqualTo: NSNull())
+                    .order(by: "createdAt", descending: true)
+                    .addSnapshotListener { snapshot, error in
+                        if let error {
+                            completion(.failure(error))
+                            return
+                        }
+
+                        let docs = snapshot?.documents ?? []
+                        let items = docs.compactMap { EventAd(snapshot: $0) }
+                        completion(.success(items))
+                    }
+            }
+        }
+
+        return placeholder
+    }
+
     // MARK: - Gate Check (free)
+
     func canCreateFreeEventThisMonth(completion: @escaping (Result<Bool, Error>) -> Void) {
         ensureSignedIn { [weak self] authResult in
             guard let self else { return }
@@ -188,6 +236,7 @@ final class EventAdsService {
     }
 
     // MARK: - Create FREE
+
     func createEventAd(
         title: String,
         city: String,
@@ -258,6 +307,7 @@ final class EventAdsService {
     }
 
     // MARK: - Create PAID (after IAP)
+
     func createPaidEventAd(
         title: String,
         city: String,
@@ -309,6 +359,7 @@ final class EventAdsService {
     }
 
     // MARK: - Update
+
     func updateEventAd(
         adId: String,
         ownerId: String,
@@ -358,6 +409,7 @@ final class EventAdsService {
     }
 
     // MARK: - Soft Delete
+
     func softDeleteEventAd(
         adId: String,
         ownerId: String,
