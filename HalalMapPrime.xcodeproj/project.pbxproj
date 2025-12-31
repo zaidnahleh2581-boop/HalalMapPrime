@@ -15,10 +15,13 @@
 		151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E92EE528050065F10C /* AdsHomeScreen.swift */; };
 		151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */; };
 		151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */; };
-		151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* FreeAdFormView.swift */; };
+		151BD9F12EE597570065F10C /* AddHalalPlaceFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */; };
 		151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F22EE597800065F10C /* MyAdsView.swift */; };
 		153BA5C72F04084F000D22FD /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5C62F04084F000D22FD /* IAPManager.swift */; };
 		153BA5D82F046983000D22FD /* HMP.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 153BA5D72F046983000D22FD /* HMP.storekit */; };
+		153BA5DC2F048082000D22FD /* PlaceSubmissionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */; };
+		153BA5DF2F0490D7000D22FD /* MyPlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */; };
+		153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */; };
 		156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156016582F032F3D00ABC8BB /* EventTemplate.swift */; };
 		1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165A2F032F6F00ABC8BB /* ContactUsView.swift */; };
 		1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */; };
@@ -76,10 +79,13 @@
 		151BD9E92EE528050065F10C /* AdsHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeScreen.swift; sourceTree = "<group>"; };
 		151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeView.swift; sourceTree = "<group>"; };
 		151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAdPlanView.swift; sourceTree = "<group>"; };
-		151BD9F02EE597570065F10C /* FreeAdFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeAdFormView.swift; sourceTree = "<group>"; };
+		151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHalalPlaceFormView.swift; sourceTree = "<group>"; };
 		151BD9F22EE597800065F10C /* MyAdsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAdsView.swift; sourceTree = "<group>"; };
 		153BA5C62F04084F000D22FD /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		153BA5D72F046983000D22FD /* HMP.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = HMP.storekit; sourceTree = "<group>"; };
+		153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSubmissionsStore.swift; sourceTree = "<group>"; };
+		153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPlacesStore.swift; sourceTree = "<group>"; };
+		153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlacesStore.swift; sourceTree = "<group>"; };
 		156016582F032F3D00ABC8BB /* EventTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTemplate.swift; sourceTree = "<group>"; };
 		1560165A2F032F6F00ABC8BB /* ContactUsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsView.swift; sourceTree = "<group>"; };
 		1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -170,8 +176,10 @@
 				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
 				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
 				151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */,
-				151BD9F02EE597570065F10C /* FreeAdFormView.swift */,
+				151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */,
 				151BD9F22EE597800065F10C /* MyAdsView.swift */,
+				153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */,
+				153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */,
 			);
 			path = ADS;
 			sourceTree = "<group>";
@@ -182,6 +190,13 @@
 				153BA5D72F046983000D22FD /* HMP.storekit */,
 			);
 			path = "StoreKit 2";
+			sourceTree = "<group>";
+		};
+		153BA5DD2F0481DC000D22FD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		156A32472F00B97600819D25 /* jobs */ = {
@@ -225,6 +240,7 @@
 				15109F932EFD807D0068DFE3 /* helpers */,
 				15A0D78A2EE05CC30063ED79 /* models */,
 				15A0D7812EE059A10063ED79 /* views */,
+				153BA5DD2F0481DC000D22FD /* Frameworks */,
 				15A0D7742EE055040063ED79 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -296,6 +312,7 @@
 				15F1CE5C2F035432007C72CA /* MonthlyEventPaywallView.swift */,
 				153BA5C62F04084F000D22FD /* IAPManager.swift */,
 				153BA5D52F046828000D22FD /* StoreKit 2 */,
+				153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */,
 			);
 			path = "\tManagers";
 			sourceTree = "<group>";
@@ -402,6 +419,7 @@
 				151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */,
 				15109F8D2EFD62510068DFE3 /* AppRouter.swift in Sources */,
 				15A0D79A2EE0605D0063ED79 /* PlaceRowView.swift in Sources */,
+				153BA5DC2F048082000D22FD /* PlaceSubmissionsStore.swift in Sources */,
 				15B48CDC2EE1A70C00A88AB7 /* AddStoreViewModel.swift in Sources */,
 				15A0D7922EE05E4C0063ED79 /* PrayerTime.swift in Sources */,
 				151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */,
@@ -410,6 +428,7 @@
 				15E162482EE0D50500A5C42C /* GooglePlacesService.swift in Sources */,
 				15B3D4C12EFDB6F800704BB6 /* RamadanImsakiyahViewModel.swift in Sources */,
 				151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */,
+				153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */,
 				156A32362F00940E00819D25 /* CommunityHubScreen.swift in Sources */,
 				15B3D4C32EFDB7B900704BB6 /* FaithPlaceholders.swift in Sources */,
 				156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */,
@@ -422,6 +441,7 @@
 				15E1626F2EE121DC00A5C42C /* Place.swift in Sources */,
 				15A0D79C2EE060900063ED79 /* PlaceDetailView.swift in Sources */,
 				15F1CE5D2F035432007C72CA /* MonthlyEventPaywallView.swift in Sources */,
+				153BA5DF2F0490D7000D22FD /* MyPlacesStore.swift in Sources */,
 				1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */,
 				15B3D4BF2EFDB40400704BB6 /* AdhanNotificationManager.swift in Sources */,
 				15B3D4A72EFDAB6600704BB6 /* FaithToolsScreen.swift in Sources */,
@@ -431,7 +451,7 @@
 				15C0B4C02EFCA2FC00532F0F /* AppLocationManager .swift in Sources */,
 				15E1624A2EE0D5D600A5C42C /* MapScreenViewModel.swift in Sources */,
 				15109F9A2EFD82B90068DFE3 /* PlaceDetailsSheet.swift in Sources */,
-				151BD9F12EE597570065F10C /* FreeAdFormView.swift in Sources */,
+				151BD9F12EE597570065F10C /* AddHalalPlaceFormView.swift in Sources */,
 				151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */,
 				15B3D4C52EFDB94500704BB6 /* QiblaCompassViewModel.swift in Sources */,
 				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,

@@ -1,216 +1,303 @@
+//
+//  AdsHomeView.swift
+//  Halal Map Prime
+//
+//  Created by Zaid Nahleh on 2025-12-30.
+//  Updated by Zaid Nahleh on 2025-12-30.
+//  Copyright © 2025 Zaid Nahleh.
+//  All rights reserved.
+//
+
 import SwiftUI
 
-/// الشاشة الرئيسية لنظام الإعلانات داخل Halal Map Prime
 struct AdsHomeView: View {
 
     @EnvironmentObject var lang: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var showFreeAdForm: Bool = false
+    @State private var showAddPlaceForm: Bool = false
     @State private var showPaidAdPlans: Bool = false
     @State private var showPrimeAdPlans: Bool = false
     @State private var showMyAds: Bool = false
 
-    /// شاشة إعلانات الوظائف (أبحث عن عمل / أبحث عن موظف)
-    @State private var showJobAds: Bool = false
+    // ✅ Preset chooser for the form
+    @State private var currentPreset: AddHalalPlaceFormView.Preset = .normal
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 18) {
 
                     headerSection
                     introSection
-                    buttonsSection
+
+                    // ✅ Quick Actions (ظاهرين من الخارج)
+                    quickActions
+
+                    VStack(spacing: 12) {
+                        paidAdCard
+                        primeAdCard
+                        myAdsCard
+                    }
+                    .padding(.top, 6)
+
                     footerNote
+                        .padding(.top, 10)
+
+                    Spacer(minLength: 24)
                 }
                 .padding()
             }
-            .navigationTitle(lang.isArabic ? "الإعلانات" : "Ads")
+            .navigationTitle(L("الإعلانات", "Ads"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
+                    Button { dismiss() } label: {
                         Image(systemName: "xmark")
                             .imageScale(.medium)
                     }
                 }
             }
-            // الشاشات الفرعية
-            .sheet(isPresented: $showFreeAdForm) {
-                FreeAdFormView()
-                    .environmentObject(lang)
+            // MARK: Sheets
+            .sheet(isPresented: $showAddPlaceForm) {
+                NavigationStack {
+                    AddHalalPlaceFormView(preset: currentPreset)
+                        .environmentObject(lang)
+                }
             }
             .sheet(isPresented: $showPaidAdPlans) {
-                SelectAdPlanView()
-                    .environmentObject(lang)
+                NavigationStack {
+                    SelectAdPlanView()
+                        .environmentObject(lang)
+                }
             }
             .sheet(isPresented: $showPrimeAdPlans) {
-                // لاحقًا ممكن تعمل شاشة خاصة للـ Prime
-                SelectAdPlanView()
-                    .environmentObject(lang)
+                NavigationStack {
+                    SelectAdPlanView()
+                        .environmentObject(lang)
+                }
             }
             .sheet(isPresented: $showMyAds) {
-                MyAdsView()
-                    .environmentObject(lang)
+                NavigationStack {
+                    MyAdsView()
+                        .environmentObject(lang)
+                }
             }
-            .sheet(isPresented: $showJobAds) {
-                JobAdsBoardView()
-                    .environmentObject(lang)
-            }        }
+        }
     }
-}
 
-// MARK: - Sections
+    // MARK: - Sections
 
-private extension AdsHomeView {
-
-    /// العنوان الرئيسي
-    var headerSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(lang.isArabic ? "الإعلانات في Halal Map Prime" : "Ads in Halal Map Prime")
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L("الإعلانات في Halal Map Prime", "Ads in Halal Map Prime"))
                 .font(.title2.weight(.semibold))
 
-            Text(lang.isArabic
-                 ? "اختر نوع الإعلان الذي يناسب نشاطك التجاري أو خدمتك، وابدأ بالوصول إلى المجتمع المسلم في نيويورك ونيوجيرسي."
-                 : "Choose the ad type that fits your business or service and reach the Muslim community in NYC & NJ.")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
+            Text(
+                L(
+                    "ابدأ بإضافة محلك الحلال على الخريطة مجاناً (Listing). الترويج الحقيقي والظهور الأعلى يكون عبر الإعلانات المدفوعة.",
+                    "Start by adding your halal place to the map for free (Listing). Real promotion and top visibility come via paid ads."
+                )
+            )
+            .font(.subheadline)
+            .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// فقرة تعريف بسيطة
-    var introSection: some View {
+    private var introSection: some View {
         Text(
-            lang.isArabic
-            ? "يمكنك بدء إعلان مجاني بسيط مرة واحدة لكل متجر، أو اختيار باقات مدفوعة يومية/أسبوعية/شهرية للحصول على ظهور أقوى في الخريطة والبنرات."
-            : "You can start with a simple one-time free ad per store, or choose paid daily / weekly / monthly plans for stronger visibility in the map and banners."
+            L(
+                "ملاحظة: الإضافة المجانية لا تسمح بنص حر. هذا يقلل السبام ويساعد على قبول Apple.",
+                "Note: the free listing does not allow free text. This reduces spam and helps Apple compliance."
+            )
         )
         .font(.subheadline)
         .foregroundColor(.secondary)
     }
 
-    /// مجموعة الأزرار الرئيسية
-    var buttonsSection: some View {
-        VStack(spacing: 12) {
+    // MARK: - Quick Actions
 
-            // إعلان مجاني
-            adButton(
-                titleAr: "إعلان مجاني (مرة واحدة)",
-                titleEn: "Free basic ad (one time)",
-                subtitleAr: "إعلان بسيط لمحلّك يظهر ضمن النتائج، متاح مرة واحدة لكل إيميل.",
-                subtitleEn: "Simple listing for your place, available once per email.",
-                background: Color.green
-            ) {
-                showFreeAdForm = true
+    private var quickActions: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("إجراءات سريعة", "Quick actions"))
+                .font(.headline)
+
+            HStack(spacing: 10) {
+                actionButton(
+                    title: L("أضف محلك الحلال", "Add Halal Place"),
+                    systemImage: "plus.circle.fill",
+                    tint: .green
+                ) {
+                    currentPreset = .halalPlace
+                    showAddPlaceForm = true
+                }
+
+                actionButton(
+                    title: L("أضف فود ترك", "Add Food Truck"),
+                    systemImage: "truck.box.fill",
+                    tint: .orange
+                ) {
+                    currentPreset = .foodTruck
+                    showAddPlaceForm = true
+                }
             }
 
-            // إعلان مدفوع (باقات)
-            adButton(
-                titleAr: "إعلان مدفوع (يومي / أسبوعي / شهري)",
-                titleEn: "Paid ad (daily / weekly / monthly)",
-                subtitleAr: "اختر باقة مرنة لزيادة ظهور نشاطك في الخريطة والبنرات.",
-                subtitleEn: "Choose a flexible plan to boost your visibility in map and banners.",
-                background: Color.blue
+            actionButtonFullWidth(
+                title: L("إضافة مكان (مجاني)", "Add place (Free)"),
+                systemImage: "mappin.and.ellipse",
+                tint: .blue
             ) {
-                showPaidAdPlans = true
-            }
-
-            // Prime Ads
-            adButton(
-                titleAr: "Prime Ads (أعلى الخريطة)",
-                titleEn: "Prime Ads (top banner)",
-                subtitleAr: "أفضل ظهور ممكن: بانر مميز أعلى الصفحة الرئيسية وعلى الخريطة.",
-                subtitleEn: "Maximum visibility: featured banner on top of the main map screen.",
-                background: Color.orange
-            ) {
-                showPrimeAdPlans = true
-            }
-
-            // إعلاناتي
-            adButton(
-                titleAr: "إعلاناتي",
-                titleEn: "My ads",
-                subtitleAr: "إدارة الإعلانات التي قمت بإنشائها من قبل.",
-                subtitleEn: "Manage the ads you have already created.",
-                background: Color.purple
-            ) {
-                showMyAds = true
-            }
-
-            // 🔹 إعلانات الوظائف (أبحث عن عمل / أبحث عن موظف)
-            adButton(
-                titleAr: "إعلانات وظائف (أبحث عن عمل / موظّف)",
-                titleEn: "Job ads (looking for job / staff)",
-                subtitleAr: "نموذج جاهز: أدخل اسمك والمدينة ونوع المكان، والنظام يجهّز نص الإعلان تلقائياً.",
-                subtitleEn: "Structured template: enter your name, area, and place type, and we generate the ad text for you.",
-                background: Color.brown
-            ) {
-                showJobAds = true
+                currentPreset = .normal
+                showAddPlaceForm = true
             }
         }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
+        )
     }
 
-    /// ملاحظة سياسة الإعلانات
-    var footerNote: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(lang.isArabic ? "ملاحظة مهمة" : "Policy note")
+    // MARK: - Cards
+
+    private var paidAdCard: some View {
+        homeCard(
+            titleAr: "إعلان مدفوع (باقات)",
+            titleEn: "Paid ads (Plans)",
+            subtitleAr: "يومي / أسبوعي / شهري — ظهور أعلى على الخريطة والبنرات.",
+            subtitleEn: "Daily / Weekly / Monthly — higher visibility on map and banners.",
+            icon: "creditcard.fill",
+            tint: .blue
+        ) { showPaidAdPlans = true }
+    }
+
+    private var primeAdCard: some View {
+        homeCard(
+            titleAr: "Prime Ads (أفضل ظهور)",
+            titleEn: "Prime Ads (Best visibility)",
+            subtitleAr: "بانر مميز + أولوية أعلى داخل التطبيق.",
+            subtitleEn: "Featured banner + higher priority across the app.",
+            icon: "sparkles",
+            tint: .orange
+        ) { showPrimeAdPlans = true }
+    }
+
+    private var myAdsCard: some View {
+        homeCard(
+            titleAr: "أماكني / إعلاناتي",
+            titleEn: "My Places / My Ads",
+            subtitleAr: "تابع حالة إضافاتك وإعلاناتك: Pending / Active / Expired.",
+            subtitleEn: "Track your submissions and ads: Pending / Active / Expired.",
+            icon: "doc.text.magnifyingglass",
+            tint: .purple
+        ) { showMyAds = true }
+    }
+
+    private var footerNote: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(L("ملاحظة سياسة", "Policy note"))
                 .font(.footnote.weight(.semibold))
 
             Text(
-                lang.isArabic
-                ? "جميع الإعلانات يجب أن تكون حلال، قانونية داخل الولايات المتحدة، ومتوافقة مع سياسات Apple App Store وقواعد مجتمع Halal Map Prime."
-                : "All ads must be halal, legal in the USA, and fully compliant with Apple App Store policies and Halal Map Prime community rules."
+                L(
+                    "المحتوى يجب أن يكون قانوني ومتوافق مع سياسات Apple ومعايير Halal Map Prime. قد يتم تعليق أي إدراج أو إعلان مخالف.",
+                    "Content must be legal and comply with Apple policies and Halal Map Prime standards. Violations may be removed."
+                )
             )
             .font(.footnote)
             .foregroundColor(.secondary)
         }
-        .padding(.top, 12)
     }
-}
 
-// MARK: - Components
+    // MARK: - Components
 
-private extension AdsHomeView {
-
-    /// زر إعلان عام قابل لإعادة الاستخدام
-    func adButton(
+    private func homeCard(
         titleAr: String,
         titleEn: String,
         subtitleAr: String,
         subtitleEn: String,
-        background: Color,
+        icon: String,
+        tint: Color,
         action: @escaping () -> Void
     ) -> some View {
-        Button {
-            action()
-        } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                Text(lang.isArabic ? titleAr : titleEn)
-                    .font(.headline)
-                    .foregroundColor(.white)
+        Button { action() } label: {
+            HStack(spacing: 12) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(tint.opacity(0.18))
+                    Image(systemName: icon)
+                        .foregroundColor(tint)
+                        .font(.headline)
+                }
+                .frame(width: 44, height: 44)
 
-                Text(lang.isArabic ? subtitleAr : subtitleEn)
-                    .font(.subheadline)
-                    .foregroundColor(Color.white.opacity(0.9))
-                    .fixedSize(horizontal: false, vertical: true)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L(titleAr, titleEn))
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    Text(L(subtitleAr, subtitleEn))
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.secondary)
             }
             .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
             .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(background.opacity(0.92))
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
             )
-            .shadow(color: background.opacity(0.25), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(.plain)
     }
-}
 
-// MARK: - Preview
+    private func actionButton(title: String, systemImage: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage)
+                Text(title)
+                    .font(.footnote.weight(.semibold))
+                Spacer(minLength: 0)
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity)
+            .background(tint.opacity(0.15))
+            .foregroundColor(tint)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func actionButtonFullWidth(title: String, systemImage: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage)
+                    .foregroundColor(.white)
+                Text(title)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.white.opacity(0.9))
+            }
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(tint.opacity(0.92))
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
+}
 
 struct AdsHomeView_Previews: PreviewProvider {
     static var previews: some View {
