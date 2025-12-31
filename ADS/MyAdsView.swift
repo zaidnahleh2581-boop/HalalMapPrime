@@ -3,7 +3,7 @@
 //  Halal Map Prime
 //
 //  Created by Zaid Nahleh on 2025-12-30.
-//  Updated by Zaid Nahleh on 2025-12-30.
+//  Updated by Zaid Nahleh on 2025-12-31.
 //  Copyright © 2025 Zaid Nahleh.
 //  All rights reserved.
 //
@@ -13,11 +13,7 @@ import SwiftUI
 struct MyAdsView: View {
 
     @EnvironmentObject var lang: LanguageManager
-
     @StateObject private var store = MyPlacesStore()
-
-    @State private var showAddPlaceForm = false
-    @State private var preset: AddHalalPlaceFormView.Preset = .normal
 
     @State private var showDeleteConfirm = false
     @State private var pendingDeleteId: String? = nil
@@ -28,10 +24,6 @@ struct MyAdsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-
-                privacyNote
-
-                quickActions
 
                 if store.isLoading {
                     HStack { Spacer(); ProgressView(); Spacer() }
@@ -50,12 +42,6 @@ struct MyAdsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { store.startListeningMyPlaces() }
         .onDisappear { store.stopListening() }
-        .sheet(isPresented: $showAddPlaceForm) {
-            NavigationStack {
-                AddHalalPlaceFormView(preset: preset)
-                    .environmentObject(lang)
-            }
-        }
         .alert(L("حذف", "Delete"), isPresented: $showDeleteConfirm) {
             Button(L("إلغاء", "Cancel"), role: .cancel) { pendingDeleteId = nil }
             Button(L("حذف نهائي", "Delete"), role: .destructive) {
@@ -80,74 +66,13 @@ struct MyAdsView: View {
         }
     }
 
-    // MARK: - Sections
-
-    private var privacyNote: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(L("ملاحظة الخصوصية", "Privacy note"))
-                .font(.footnote.weight(.semibold))
-
-            Text(L(
-                "بياناتك لا تُباع. يتم حفظ الإدراجات للمراجعة (Pending) وقد تظهر لاحقًا عند الموافقة.",
-                "Your data is not sold. Submissions are saved as Pending and may appear after review."
-            ))
-            .font(.footnote)
-            .foregroundColor(.secondary)
-        }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 14).fill(Color(.systemGray6)))
-    }
-
-    private var quickActions: some View {
-        VStack(alignment: .leading, spacing: 10) {
-
-            Text(L("إضافة جديدة", "Add new"))
-                .font(.headline)
-
-            HStack(spacing: 10) {
-
-                smallAction(
-                    title: L("أضف محلك الحلال", "Add Halal Place"),
-                    icon: "plus.circle.fill",
-                    tint: .green
-                ) {
-                    preset = .halalPlace
-                    showAddPlaceForm = true
-                }
-
-                smallAction(
-                    title: L("أضف فود ترك", "Add Food Truck"),
-                    icon: "truck.box.fill",
-                    tint: .orange
-                ) {
-                    preset = .foodTruck
-                    showAddPlaceForm = true
-                }
-            }
-
-            bigAction(
-                title: L("إضافة مكان (مجاني)", "Add place (Free)"),
-                systemImage: "mappin.and.ellipse",
-                tint: .blue
-            ) {
-                preset = .normal
-                showAddPlaceForm = true
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
-        )
-    }
+    // MARK: - List
 
     private var listSection: some View {
         VStack(alignment: .leading, spacing: 10) {
 
             Text(L("قائمة إدراجاتي", "My submissions"))
                 .font(.headline)
-                .padding(.top, 6)
 
             if store.items.isEmpty && !store.isLoading {
                 emptyState
@@ -158,8 +83,6 @@ struct MyAdsView: View {
             }
         }
     }
-
-    // MARK: - Row
 
     private func row(_ item: MyPlacesStore.MyPlaceRow) -> some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -243,7 +166,7 @@ struct MyAdsView: View {
             Text(L("لا يوجد إدراجات بعد", "No submissions yet"))
                 .font(.headline)
 
-            Text(L("اضغط إضافة مكان لبدء أول إدراج لك.", "Tap Add place to create your first submission."))
+            Text(L("أضف مكانك المجاني من أعلى صفحة الإعلانات.", "Add your free place from the top Ads tab."))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -266,37 +189,6 @@ struct MyAdsView: View {
         }
         .padding()
         .background(RoundedRectangle(cornerRadius: 14).fill(Color.red.opacity(0.10)))
-    }
-
-    private func smallAction(title: String, icon: String, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                Text(title).font(.footnote.weight(.semibold))
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity)
-            .background(tint.opacity(0.15))
-            .foregroundColor(tint)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func bigAction(title: String, systemImage: String, tint: Color, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack(spacing: 10) {
-                Image(systemName: systemImage).foregroundColor(.white)
-                Text(title).font(.headline).foregroundColor(.white)
-                Spacer()
-                Image(systemName: "chevron.right").foregroundColor(.white.opacity(0.9))
-            }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(tint.opacity(0.92))
-            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-        }
-        .buttonStyle(.plain)
     }
 
     private func prettyType(_ raw: String) -> String {
