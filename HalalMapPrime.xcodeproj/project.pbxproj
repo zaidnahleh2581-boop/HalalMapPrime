@@ -22,6 +22,7 @@
 		153BA5DC2F048082000D22FD /* PlaceSubmissionsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */; };
 		153BA5DF2F0490D7000D22FD /* MyPlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */; };
 		153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */; };
+		153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */; };
 		156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156016582F032F3D00ABC8BB /* EventTemplate.swift */; };
 		1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165A2F032F6F00ABC8BB /* ContactUsView.swift */; };
 		1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */; };
@@ -86,6 +87,7 @@
 		153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceSubmissionsStore.swift; sourceTree = "<group>"; };
 		153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyPlacesStore.swift; sourceTree = "<group>"; };
 		153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivePlacesStore.swift; sourceTree = "<group>"; };
+		153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyFreeGate.swift; sourceTree = "<group>"; };
 		156016582F032F3D00ABC8BB /* EventTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTemplate.swift; sourceTree = "<group>"; };
 		1560165A2F032F6F00ABC8BB /* ContactUsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsView.swift; sourceTree = "<group>"; };
 		1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -313,6 +315,7 @@
 				153BA5C62F04084F000D22FD /* IAPManager.swift */,
 				153BA5D52F046828000D22FD /* StoreKit 2 */,
 				153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */,
+				153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */,
 			);
 			path = "\tManagers";
 			sourceTree = "<group>";
@@ -429,6 +432,7 @@
 				15B3D4C12EFDB6F800704BB6 /* RamadanImsakiyahViewModel.swift in Sources */,
 				151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */,
 				153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */,
+				153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */,
 				156A32362F00940E00819D25 /* CommunityHubScreen.swift in Sources */,
 				15B3D4C32EFDB7B900704BB6 /* FaithPlaceholders.swift in Sources */,
 				156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */,

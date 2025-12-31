@@ -26,9 +26,9 @@ final class PlaceSubmissionsStore: ObservableObject {
 
     private init() {}
 
-    // MARK: - Public API
+    // MARK: - Submit Place
 
-    /// Submit a halal place (saved as pending by default) and stores geo automatically from address.
+    /// Submit a place (pending) + saves geo automatically + marks monthly free used
     func submitPlace(
         placeName: String,
         phone: String?,
@@ -45,14 +45,12 @@ final class PlaceSubmissionsStore: ObservableObject {
 
         let uid = try await ensureUID()
 
-        // ✅ Build full address for geocoding
         let fullAddress = buildFullAddress(
             addressLine: addressLine,
             city: city,
             state: state
         )
 
-        // ✅ Try to get coordinates (MapKit geocode style)
         let coordinate = try await geocodeAddress(fullAddress)
 
         var data: [String: Any] = [
@@ -64,21 +62,28 @@ final class PlaceSubmissionsStore: ObservableObject {
             "status": "pending",
             "createdAt": FieldValue.serverTimestamp(),
 
-            // ✅ Save GeoPoint (THIS is what your map needs)
-            "geo": GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude)
+            // ✅ Geo for map pins
+            "geo": GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude),
+
+            // (Optional) also store doubles for convenience
+            "lat": coordinate.latitude,
+            "lng": coordinate.longitude
         ]
 
-        if let phone, !phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            data["phone"] = phone
-        }
-        if let addressLine, !addressLine.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            data["addressLine"] = addressLine
-        }
-        if let foodTruckStop, !foodTruckStop.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            data["foodTruckStop"] = foodTruckStop
-        }
+        let p = (phone ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !p.isEmpty { data["phone"] = p }
+
+        let a = (addressLine ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !a.isEmpty { data["addressLine"] = a }
+
+        let stop = (foodTruckStop ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !stop.isEmpty { data["foodTruckStop"] = stop }
 
         let ref = try await db.collection("place_submissions").addDocument(data: data)
+
+        // ✅ mark monthly free used AFTER successful submit
+        try await MonthlyFreeGate.shared.markFreeUsed(phone: phone)
+
         return ref.documentID
     }
 
@@ -91,7 +96,9 @@ final class PlaceSubmissionsStore: ObservableObject {
             Auth.auth().signInAnonymously { result, error in
                 if let error { cont.resume(throwing: error); return }
                 guard let uid = result?.user.uid else {
-                    cont.resume(throwing: NSError(domain: "Auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Missing UID"]))
+                    cont.resume(throwing: NSError(domain: "Auth", code: -1, userInfo: [
+                        NSLocalizedDescriptionKey: "Missing UID"
+                    ]))
                     return
                 }
                 cont.resume(returning: uid)
@@ -104,17 +111,14 @@ final class PlaceSubmissionsStore: ObservableObject {
     private func buildFullAddress(addressLine: String?, city: String, state: String) -> String {
         let a = (addressLine ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         if a.isEmpty {
-            // still geocode city + state (best effort)
             return "\(city), \(state)"
         }
         return "\(a), \(city), \(state)"
     }
 
-    /// Geocoding using MapKit (safe path for modern iOS).
+    /// Geocoding using MapKit (MKLocalSearch) — works well and avoids deprecated CLGeocoder warnings.
     private func geocodeAddress(_ address: String) async throws -> CLLocationCoordinate2D {
 
-        // Use MKLocalSearch as “MapKit geocode” approach:
-        // It finds the best match for an address string.
         let request = MKLocalSearch.Request()
         request.naturalLanguageQuery = address
 
