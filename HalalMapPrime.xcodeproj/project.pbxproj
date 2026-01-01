@@ -29,6 +29,10 @@
 		153BA5F12F0532C5000D22FD /* MyEventsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5F02F0532C5000D22FD /* MyEventsView.swift */; };
 		153BA5F32F0532E8000D22FD /* MyEventsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA5F22F0532E8000D22FD /* MyEventsViewModel.swift */; };
 		153BA6552F05677E000D22FD /* AdsPrivacyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA6542F05677E000D22FD /* AdsPrivacyView.swift */; };
+		153BA6752F06A648000D22FD /*  FreeAdStateStore  .swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA6742F06A648000D22FD /*  FreeAdStateStore  .swift */; };
+		153BA6772F06BA1B000D22FD /* IAPProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA6762F06BA1B000D22FD /* IAPProducts.swift */; };
+		153BA67B2F06BA7A000D22FD /* PurchaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA67A2F06BA7A000D22FD /* PurchaseManager.swift */; };
+		153BA67D2F06BABB000D22FD /* PaidAdsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 153BA67C2F06BABB000D22FD /* PaidAdsScreen.swift */; };
 		156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156016582F032F3D00ABC8BB /* EventTemplate.swift */; };
 		1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165A2F032F6F00ABC8BB /* ContactUsView.swift */; };
 		1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */; };
@@ -100,6 +104,10 @@
 		153BA5F02F0532C5000D22FD /* MyEventsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyEventsView.swift; sourceTree = "<group>"; };
 		153BA5F22F0532E8000D22FD /* MyEventsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyEventsViewModel.swift; sourceTree = "<group>"; };
 		153BA6542F05677E000D22FD /* AdsPrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsPrivacyView.swift; sourceTree = "<group>"; };
+		153BA6742F06A648000D22FD /*  FreeAdStateStore  .swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = " FreeAdStateStore  .swift"; sourceTree = "<group>"; };
+		153BA6762F06BA1B000D22FD /* IAPProducts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPProducts.swift; sourceTree = "<group>"; };
+		153BA67A2F06BA7A000D22FD /* PurchaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseManager.swift; sourceTree = "<group>"; };
+		153BA67C2F06BABB000D22FD /* PaidAdsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaidAdsScreen.swift; sourceTree = "<group>"; };
 		156016582F032F3D00ABC8BB /* EventTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTemplate.swift; sourceTree = "<group>"; };
 		1560165A2F032F6F00ABC8BB /* ContactUsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsView.swift; sourceTree = "<group>"; };
 		1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -186,6 +194,7 @@
 		151BD9EB2EE596C00065F10C /* ADS */ = {
 			isa = PBXGroup;
 			children = (
+				153BA6762F06BA1B000D22FD /* IAPProducts.swift */,
 				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
 				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
 				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
@@ -195,6 +204,8 @@
 				153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */,
 				153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */,
 				153BA6542F05677E000D22FD /* AdsPrivacyView.swift */,
+				153BA6742F06A648000D22FD /*  FreeAdStateStore  .swift */,
+				153BA67C2F06BABB000D22FD /* PaidAdsScreen.swift */,
 			);
 			path = ADS;
 			sourceTree = "<group>";
@@ -334,6 +345,7 @@
 				153BA5D52F046828000D22FD /* StoreKit 2 */,
 				153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */,
 				153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */,
+				153BA67A2F06BA7A000D22FD /* PurchaseManager.swift */,
 			);
 			path = "\tManagers";
 			sourceTree = "<group>";
@@ -430,6 +442,7 @@
 				153BA5F12F0532C5000D22FD /* MyEventsView.swift in Sources */,
 				156A32422F00940E00819D25 /* AddPlaceCategory.swift in Sources */,
 				15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */,
+				153BA6752F06A648000D22FD /*  FreeAdStateStore  .swift in Sources */,
 				151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */,
 				15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */,
 				151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */,
@@ -453,6 +466,7 @@
 				153BA5ED2F052E31000D22FD /* HomeEventsTickerView.swift in Sources */,
 				153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */,
 				153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */,
+				153BA67D2F06BABB000D22FD /* PaidAdsScreen.swift in Sources */,
 				156A32362F00940E00819D25 /* CommunityHubScreen.swift in Sources */,
 				153BA6552F05677E000D22FD /* AdsPrivacyView.swift in Sources */,
 				153BA5EB2F052E07000D22FD /* MarqueeText.swift in Sources */,
@@ -460,6 +474,7 @@
 				156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */,
 				15B3D4BB2EFDAF6C00704BB6 /* PrayerTimesViewModel.swift in Sources */,
 				15D014352F02BBCB00D34C64 /* JobAlertsSheet 2.swift in Sources */,
+				153BA67B2F06BA7A000D22FD /* PurchaseManager.swift in Sources */,
 				15B3D4C72EFDBBF200704BB6 /* AdhanSettingsSheet.swift in Sources */,
 				15B48CF32EE1E50300A88AB7 /* GooglePlacesModelsswift.swift in Sources */,
 				1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */,
@@ -483,6 +498,7 @@
 				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,
 				153BA5F32F0532E8000D22FD /* MyEventsViewModel.swift in Sources */,
 				15A0D79E2EE0626B0063ED79 /* AddStoreScreen.swift in Sources */,
+				153BA6772F06BA1B000D22FD /* IAPProducts.swift in Sources */,
 				153BA5EF2F0531DB000D22FD /* CoreEventCategory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

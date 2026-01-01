@@ -53,19 +53,29 @@ final class PlaceSubmissionsStore: ObservableObject {
 
         let coordinate = try await geocodeAddress(fullAddress)
 
+        // ✅ Free Ad timing (30 days)
+        let now = Date()
+        let freeEnds = Calendar.current.date(byAdding: .day, value: 30, to: now)!
+
         var data: [String: Any] = [
             "ownerId": uid,
             "placeName": placeName,
             "placeType": placeType,
             "city": city,
             "state": state,
+
+            // Status
             "status": "pending",
+
+            // Dates
             "createdAt": FieldValue.serverTimestamp(),
+            "isFreeAd": true,
+            "adType": "free",
+            "freeStartedAt": Timestamp(date: now),
+            "freeEndsAt": Timestamp(date: freeEnds),
 
-            // ✅ Geo for map pins
+            // Geo
             "geo": GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude),
-
-            // (Optional) also store doubles for convenience
             "lat": coordinate.latitude,
             "lng": coordinate.longitude
         ]
@@ -94,11 +104,16 @@ final class PlaceSubmissionsStore: ObservableObject {
 
         return try await withCheckedThrowingContinuation { cont in
             Auth.auth().signInAnonymously { result, error in
-                if let error { cont.resume(throwing: error); return }
+                if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
                 guard let uid = result?.user.uid else {
-                    cont.resume(throwing: NSError(domain: "Auth", code: -1, userInfo: [
-                        NSLocalizedDescriptionKey: "Missing UID"
-                    ]))
+                    cont.resume(throwing: NSError(
+                        domain: "Auth",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: "Missing UID"]
+                    ))
                     return
                 }
                 cont.resume(returning: uid)
@@ -116,7 +131,7 @@ final class PlaceSubmissionsStore: ObservableObject {
         return "\(a), \(city), \(state)"
     }
 
-    /// Geocoding using MapKit (MKLocalSearch) — works well and avoids deprecated CLGeocoder warnings.
+    /// Geocoding using MapKit (MKLocalSearch)
     private func geocodeAddress(_ address: String) async throws -> CLLocationCoordinate2D {
 
         let request = MKLocalSearch.Request()
@@ -131,11 +146,12 @@ final class PlaceSubmissionsStore: ObservableObject {
                     return
                 }
                 guard let item = response?.mapItems.first,
-                      let coord = item.placemark.location?.coordinate
-                else {
-                    cont.resume(throwing: NSError(domain: "Geocode", code: -2, userInfo: [
-                        NSLocalizedDescriptionKey: "Could not geocode address: \(address)"
-                    ]))
+                      let coord = item.placemark.location?.coordinate else {
+                    cont.resume(throwing: NSError(
+                        domain: "Geocode",
+                        code: -2,
+                        userInfo: [NSLocalizedDescriptionKey: "Could not geocode address: \(address)"]
+                    ))
                     return
                 }
                 cont.resume(returning: coord)

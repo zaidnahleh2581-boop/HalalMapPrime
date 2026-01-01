@@ -9,11 +9,68 @@
 //
 
 import SwiftUI
+import Combine
+import FirebaseAuth
+
+// MARK: - Free Gift State Store (in-file, no extra files needed)
+@MainActor
+final class FreeGiftBannerStore: ObservableObject {
+
+    enum State: Equatable {
+        case loading
+        case neverUsed
+        case alreadyUsed
+        case error(String)
+    }
+
+    @Published var state: State = .loading
+
+    func refresh(phone: String?) {
+        state = .loading
+        Task {
+            do {
+                _ = try await ensureUID()
+                let canUse = try await MonthlyFreeGate.shared.canUseFreeThisMonth(phone: phone)
+                self.state = canUse ? .neverUsed : .alreadyUsed
+            } catch {
+                self.state = .error(error.localizedDescription)
+            }
+        }
+    }
+
+    private func ensureUID() async throws -> String {
+        if let uid = Auth.auth().currentUser?.uid { return uid }
+
+        return try await withCheckedThrowingContinuation { cont in
+            Auth.auth().signInAnonymously { result, error in
+                if let error { cont.resume(throwing: error); return }
+                guard let uid = result?.user.uid else {
+                    cont.resume(throwing: NSError(domain: "Auth", code: -1, userInfo: [
+                        NSLocalizedDescriptionKey: "Missing UID"
+                    ]))
+                    return
+                }
+                cont.resume(returning: uid)
+            }
+        }
+    }
+}
 
 struct AdsHomeView: View {
 
     @EnvironmentObject var lang: LanguageManager
     @Environment(\.dismiss) private var dismiss
+
+    // ✅ Needed (was missing in your errors)
+    @State private var showComingSoon = false
+
+    // Sheets
+    @State private var showAddPlaceSheet = false
+    @State private var showMyAdsSheet = false
+    @State private var showPrivacySheet = false
+
+    // ✅ Free gift banner store (self-contained)
+    @StateObject private var freeGiftStore = FreeGiftBannerStore()
 
     // MARK: - Tabs
     enum TopTab: String, CaseIterable, Identifiable {
@@ -25,21 +82,17 @@ struct AdsHomeView: View {
 
     @State private var selectedTab: TopTab = .free
 
-    // Sheets
-    @State private var showAddPlaceSheet = false
-    @State private var showMyAdsSheet = false
-    @State private var showPrivacySheet = false
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
 
             topTabs
-
             Divider().opacity(0.20)
 
-            // ✅ Main page stays PAID content always (clean)
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+
+                    // ✅ FREE GIFT Banner (One-time)
+                    freeGiftBanner
 
                     Text(L("إعلانات مدفوعة", "Paid Ads"))
                         .font(.title2.weight(.bold))
@@ -51,7 +104,7 @@ struct AdsHomeView: View {
                         icon: "creditcard.fill",
                         tint: .cyan
                     ) {
-                        // TODO: open packages
+                        showComingSoon = true
                     }
 
                     paidCard(
@@ -60,7 +113,7 @@ struct AdsHomeView: View {
                         icon: "sparkles",
                         tint: .orange
                     ) {
-                        // TODO: open prime
+                        showComingSoon = true
                     }
 
                     Spacer(minLength: 18)
@@ -78,8 +131,13 @@ struct AdsHomeView: View {
                 }
             }
         }
+        .alert(L("قريباً", "Coming Soon"), isPresented: $showComingSoon) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(L("هذه الميزة قيد التجهيز. سنفعّلها قريباً.", "This feature is being prepared and will be enabled soon."))
+        }
 
-        // ✅ Add Place Sheet (close returns here)
+        // ✅ Add Place Sheet
         .sheet(isPresented: $showAddPlaceSheet) {
             NavigationStack {
                 AddHalalPlaceFormView(preset: .normal)
@@ -88,30 +146,26 @@ struct AdsHomeView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            Button(L("إغلاق", "Close")) {
-                                showAddPlaceSheet = false
-                            }
+                            Button(L("إغلاق", "Close")) { showAddPlaceSheet = false }
                         }
                     }
             }
         }
 
-        // ✅ My Ads Sheet (close returns here)
+        // ✅ My Ads Sheet
         .sheet(isPresented: $showMyAdsSheet) {
             NavigationStack {
                 MyAdsView()
                     .environmentObject(lang)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            Button(L("إغلاق", "Close")) {
-                                showMyAdsSheet = false
-                            }
+                            Button(L("إغلاق", "Close")) { showMyAdsSheet = false }
                         }
                     }
             }
         }
 
-        // ✅ Privacy Sheet (close returns here)
+        // ✅ Privacy Sheet
         .sheet(isPresented: $showPrivacySheet) {
             NavigationStack {
                 AdsPrivacyView()
@@ -120,12 +174,16 @@ struct AdsHomeView: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
-                            Button(L("إغلاق", "Close")) {
-                                showPrivacySheet = false
-                            }
+                            Button(L("إغلاق", "Close")) { showPrivacySheet = false }
                         }
                     }
             }
+        }
+
+        // ✅ Refresh free gift status when view appears
+        .onAppear {
+            // phone is optional gate; if you later store phone globally, pass it here
+            freeGiftStore.refresh(phone: nil)
         }
     }
 
@@ -133,6 +191,7 @@ struct AdsHomeView: View {
 
     private var topTabs: some View {
         HStack(spacing: 10) {
+
             tabButton(
                 title: L("إضافة مكان (مجاني)", "Add Place (Free)"),
                 systemImage: "mappin.and.ellipse",
@@ -167,7 +226,108 @@ struct AdsHomeView: View {
         .padding(.top, 8)
     }
 
-    // MARK: - UI
+    // MARK: - Free Gift Banner (One-time)
+
+    @ViewBuilder
+    private var freeGiftBanner: some View {
+        switch freeGiftStore.state {
+
+        case .loading:
+            HStack(spacing: 10) {
+                ProgressView()
+                Text(L("جاري التحقق من الهدية...", "Checking free gift..."))
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(cardBG)
+
+        case .neverUsed:
+            VStack(alignment: .leading, spacing: 10) {
+
+                HStack(spacing: 10) {
+                    Image(systemName: "gift.fill")
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Color.green.opacity(0.95))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(L("🎁 إعلان مجاني — هدية من التطبيق", "🎁 Free Ad — Gift from the app"))
+                            .font(.headline)
+
+                        Text(L("لمرة واحدة فقط • مدة 30 يوم", "One-time only • 30 days"))
+                            .font(.footnote)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+                }
+
+                Text(L(
+                    "جرّب البرنامج براحتك. قبل ما ينتهي الإعلان بنذكّرك في آخر أسبوع + قبل 24 ساعة.",
+                    "Try the app comfortably. We’ll remind you in the last week + 24 hours before expiry."
+                ))
+                .font(.footnote)
+                .foregroundColor(.secondary)
+
+                Button {
+                    showAddPlaceSheet = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Text(L("ابدأ الإعلان المجاني", "Start Free Ad"))
+                            .font(.subheadline.weight(.semibold))
+                        Spacer()
+                    }
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color.green.opacity(0.95))
+                    )
+                    .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding()
+            .background(cardBG)
+
+        case .alreadyUsed:
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .foregroundColor(.green)
+
+                    Text(L("تم استخدام الهدية المجانية", "Free gift already used"))
+                        .font(.headline)
+
+                    Spacer()
+                }
+
+                Text(L(
+                    "الهدية كانت لمرة واحدة فقط. تابع الآن على الباقات المدفوعة.",
+                    "The free gift was one-time only. Continue with paid plans."
+                ))
+                .font(.footnote)
+                .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(cardBG)
+
+        case .error(let message):
+            VStack(alignment: .leading, spacing: 6) {
+                Text(L("ملاحظة", "Note"))
+                    .font(.headline)
+                Text(message)
+                    .font(.footnote)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(cardBG)
+        }
+    }
+
+    // MARK: - UI Helpers
 
     private func paidCard(title: String, subtitle: String, icon: String, tint: Color, action: @escaping () -> Void) -> some View {
         Button(action: action) {
@@ -192,11 +352,7 @@ struct AdsHomeView: View {
                     .foregroundColor(.secondary)
             }
             .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
-            )
+            .background(cardBG)
         }
         .buttonStyle(.plain)
     }
@@ -220,6 +376,13 @@ struct AdsHomeView: View {
             .foregroundColor(isSelected ? .white : (tint == .gray ? .primary : tint))
         }
         .buttonStyle(.plain)
+    }
+
+    // ✅ This fixes your “Cannot find cardBG”
+    private var cardBG: some View {
+        RoundedRectangle(cornerRadius: 16, style: .continuous)
+            .fill(Color(.systemBackground))
+            .shadow(color: Color.black.opacity(0.06), radius: 6, x: 0, y: 3)
     }
 
     private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
