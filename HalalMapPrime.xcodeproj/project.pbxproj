@@ -40,6 +40,12 @@
 		155C3FED2F0A9617009EEB95 /* PrimeAdInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FEC2F0A9617009EEB95 /* PrimeAdInfoView.swift */; };
 		155C3FEF2F0A9749009EEB95 /* PaidAdPlanDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FEE2F0A9749009EEB95 /* PaidAdPlanDetailView.swift */; };
 		155C3FF32F0A9E88009EEB95 /* AdPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FF22F0A9E88009EEB95 /* AdPlan.swift */; };
+		155C3FF92F0ADB02009EEB95 /* CreateAdFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FF82F0ADB02009EEB95 /* CreateAdFormView.swift */; };
+		155C3FFD2F0AEBFC009EEB95 /* AdPlanDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FFC2F0AEBFC009EEB95 /* AdPlanDetailsView.swift */; };
+		155C3FFF2F0AF9E5009EEB95 /* HMPAdPlanKind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C3FFE2F0AF9E5009EEB95 /* HMPAdPlanKind.swift */; };
+		155C40012F0B0D32009EEB95 /* AdsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C40002F0B0D32009EEB95 /* AdsStore.swift */; };
+		155C40042F0B1424009EEB95 /* HMPAd.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C40032F0B1424009EEB95 /* HMPAd.swift */; };
+		155C40062F0B21B4009EEB95 /* FreeOnceGateStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155C40052F0B21B4009EEB95 /* FreeOnceGateStore.swift */; };
 		156016592F032F3D00ABC8BB /* EventTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 156016582F032F3D00ABC8BB /* EventTemplate.swift */; };
 		1560165B2F032F6F00ABC8BB /* ContactUsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165A2F032F6F00ABC8BB /* ContactUsView.swift */; };
 		1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */; };
@@ -122,6 +128,12 @@
 		155C3FEC2F0A9617009EEB95 /* PrimeAdInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimeAdInfoView.swift; sourceTree = "<group>"; };
 		155C3FEE2F0A9749009EEB95 /* PaidAdPlanDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaidAdPlanDetailView.swift; sourceTree = "<group>"; };
 		155C3FF22F0A9E88009EEB95 /* AdPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdPlan.swift; sourceTree = "<group>"; };
+		155C3FF82F0ADB02009EEB95 /* CreateAdFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAdFormView.swift; sourceTree = "<group>"; };
+		155C3FFC2F0AEBFC009EEB95 /* AdPlanDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdPlanDetailsView.swift; sourceTree = "<group>"; };
+		155C3FFE2F0AF9E5009EEB95 /* HMPAdPlanKind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HMPAdPlanKind.swift; sourceTree = "<group>"; };
+		155C40002F0B0D32009EEB95 /* AdsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsStore.swift; sourceTree = "<group>"; };
+		155C40032F0B1424009EEB95 /* HMPAd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HMPAd.swift; sourceTree = "<group>"; };
+		155C40052F0B21B4009EEB95 /* FreeOnceGateStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FreeOnceGateStore.swift; sourceTree = "<group>"; };
 		156016582F032F3D00ABC8BB /* EventTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTemplate.swift; sourceTree = "<group>"; };
 		1560165A2F032F6F00ABC8BB /* ContactUsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsView.swift; sourceTree = "<group>"; };
 		1560165C2F032F9500ABC8BB /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
@@ -208,21 +220,10 @@
 		151BD9EB2EE596C00065F10C /* ADS */ = {
 			isa = PBXGroup;
 			children = (
+				155C40022F0B13C9009EEB95 /* HMP ads */,
+				155C3FFB2F0AE128009EEB95 /* Ads Home View */,
+				155C3FFA2F0ADFDA009EEB95 /* Free Ads */,
 				155C3FE72F0A956E009EEB95 /* Ads paid plan */,
-				153BA6762F06BA1B000D22FD /* IAPProducts.swift */,
-				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
-				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
-				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
-				151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */,
-				151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */,
-				151BD9F22EE597800065F10C /* MyAdsView.swift */,
-				153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */,
-				153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */,
-				153BA6542F05677E000D22FD /* AdsPrivacyView.swift */,
-				153BA6742F06A648000D22FD /*  FreeAdStateStore  .swift */,
-				153BA67C2F06BABB000D22FD /* PaidAdsScreen.swift */,
-				153BA67E2F06CEC4000D22FD /* LifetimeFreePlaceGate.swift */,
-				155C3FE52F0A8F48009EEB95 /* FreeMonthlyAdFormView.swift */,
 			);
 			path = ADS;
 			sourceTree = "<group>";
@@ -249,9 +250,51 @@
 				155C3FEA2F0A95E6009EEB95 /* MonthlyAdInfoView.swift */,
 				155C3FEC2F0A9617009EEB95 /* PrimeAdInfoView.swift */,
 				155C3FEE2F0A9749009EEB95 /* PaidAdPlanDetailView.swift */,
+				153BA67C2F06BABB000D22FD /* PaidAdsScreen.swift */,
 				155C3FF22F0A9E88009EEB95 /* AdPlan.swift */,
 			);
 			path = "Ads paid plan";
+			sourceTree = "<group>";
+		};
+		155C3FFA2F0ADFDA009EEB95 /* Free Ads */ = {
+			isa = PBXGroup;
+			children = (
+				153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */,
+				153BA67E2F06CEC4000D22FD /* LifetimeFreePlaceGate.swift */,
+				155C3FE52F0A8F48009EEB95 /* FreeMonthlyAdFormView.swift */,
+				153BA6742F06A648000D22FD /*  FreeAdStateStore  .swift */,
+				155C40052F0B21B4009EEB95 /* FreeOnceGateStore.swift */,
+			);
+			path = "Free Ads";
+			sourceTree = "<group>";
+		};
+		155C3FFB2F0AE128009EEB95 /* Ads Home View */ = {
+			isa = PBXGroup;
+			children = (
+				153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */,
+				151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */,
+				153BA6542F05677E000D22FD /* AdsPrivacyView.swift */,
+				151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */,
+				153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */,
+				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
+				151BD9F22EE597800065F10C /* MyAdsView.swift */,
+				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
+				153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */,
+				151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */,
+				155C3FF82F0ADB02009EEB95 /* CreateAdFormView.swift */,
+				155C3FFC2F0AEBFC009EEB95 /* AdPlanDetailsView.swift */,
+				155C3FFE2F0AF9E5009EEB95 /* HMPAdPlanKind.swift */,
+				155C40002F0B0D32009EEB95 /* AdsStore.swift */,
+			);
+			path = "Ads Home View";
+			sourceTree = "<group>";
+		};
+		155C40022F0B13C9009EEB95 /* HMP ads */ = {
+			isa = PBXGroup;
+			children = (
+				155C40032F0B1424009EEB95 /* HMPAd.swift */,
+			);
+			path = "HMP ads";
 			sourceTree = "<group>";
 		};
 		156A32472F00B97600819D25 /* jobs */ = {
@@ -370,11 +413,10 @@
 				15109F8C2EFD62510068DFE3 /* AppRouter.swift */,
 				15C0B4BF2EFCA2FC00532F0F /* AppLocationManager .swift */,
 				15F1CE5C2F035432007C72CA /* MonthlyEventPaywallView.swift */,
-				153BA5C62F04084F000D22FD /* IAPManager.swift */,
-				153BA5D52F046828000D22FD /* StoreKit 2 */,
-				153BA5DB2F048082000D22FD /* PlaceSubmissionsStore.swift */,
-				153BA5E82F04AED8000D22FD /* MonthlyFreeGate.swift */,
 				153BA67A2F06BA7A000D22FD /* PurchaseManager.swift */,
+				153BA5C62F04084F000D22FD /* IAPManager.swift */,
+				153BA6762F06BA1B000D22FD /* IAPProducts.swift */,
+				153BA5D52F046828000D22FD /* StoreKit 2 */,
 			);
 			path = "\tManagers";
 			sourceTree = "<group>";
@@ -477,12 +519,15 @@
 				151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */,
 				15CEB20A2EE7CC780035A83D /* EventAdsBoardView.swift in Sources */,
 				15CEB2042EE7C5DF0035A83D /* NoticeBoardViews.swift in Sources */,
+				155C40012F0B0D32009EEB95 /* AdsStore.swift in Sources */,
+				155C40062F0B21B4009EEB95 /* FreeOnceGateStore.swift in Sources */,
 				155C3FE62F0A8F48009EEB95 /* FreeMonthlyAdFormView.swift in Sources */,
 				151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */,
 				15CEB1F82EE78AB00035A83D /* EventAdComposerView.swift in Sources */,
 				15B3D4BD2EFDB3DE00704BB6 /* AdhanReminderSettings.swift in Sources */,
 				151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */,
 				155C3FEF2F0A9749009EEB95 /* PaidAdPlanDetailView.swift in Sources */,
+				155C3FFF2F0AF9E5009EEB95 /* HMPAdPlanKind.swift in Sources */,
 				15109F8D2EFD62510068DFE3 /* AppRouter.swift in Sources */,
 				15A0D79A2EE0605D0063ED79 /* PlaceRowView.swift in Sources */,
 				153BA5DC2F048082000D22FD /* PlaceSubmissionsStore.swift in Sources */,
@@ -495,6 +540,7 @@
 				15B3D4C12EFDB6F800704BB6 /* RamadanImsakiyahViewModel.swift in Sources */,
 				151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */,
 				155C3FF32F0A9E88009EEB95 /* AdPlan.swift in Sources */,
+				155C3FF92F0ADB02009EEB95 /* CreateAdFormView.swift in Sources */,
 				153BA5ED2F052E31000D22FD /* HomeEventsTickerView.swift in Sources */,
 				153BA5E32F0495ED000D22FD /* ActivePlacesStore.swift in Sources */,
 				153BA5E92F04AED8000D22FD /* MonthlyFreeGate.swift in Sources */,
@@ -521,6 +567,7 @@
 				1560165D2F032F9500ABC8BB /* PrivacyPolicyView.swift in Sources */,
 				15B3D4BF2EFDB40400704BB6 /* AdhanNotificationManager.swift in Sources */,
 				15B3D4A72EFDAB6600704BB6 /* FaithToolsScreen.swift in Sources */,
+				155C40042F0B1424009EEB95 /* HMPAd.swift in Sources */,
 				153BA5C72F04084F000D22FD /* IAPManager.swift in Sources */,
 				15C0B4BD2EFC8FC200532F0F /* LocationPermissionView.swift in Sources */,
 				15D014372F02C07500D34C64 /* jobLegacyBoard.swift in Sources */,
@@ -534,6 +581,7 @@
 				15C0B4BB2EFC8F8600532F0F /* FiLocationManagerle.swift in Sources */,
 				153BA5F32F0532E8000D22FD /* MyEventsViewModel.swift in Sources */,
 				15A0D79E2EE0626B0063ED79 /* AddStoreScreen.swift in Sources */,
+				155C3FFD2F0AEBFC009EEB95 /* AdPlanDetailsView.swift in Sources */,
 				153BA6772F06BA1B000D22FD /* IAPProducts.swift in Sources */,
 				153BA5EF2F0531DB000D22FD /* CoreEventCategory.swift in Sources */,
 			);

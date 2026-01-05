@@ -14,56 +14,47 @@ import StoreKit
 @MainActor
 final class PurchaseManager: ObservableObject {
 
-    @Published var products: [Product] = []
+    @Published var product: Product? = nil
     @Published var isLoading: Bool = false
     @Published var errorMessage: String? = nil
+    @Published var purchaseMessage: String? = nil
 
-    let productIDs: [String] = [
-        "weekly_ad",
-        "monthly_ad",
-        "prime_ad"
-    ]
-
-    init() {
-        Task { await loadProducts() }
-    }
-
-    func loadProducts() async {
+    func loadProduct(for productId: String) async {
         isLoading = true
         errorMessage = nil
-        products = []
+        purchaseMessage = nil
+        product = nil
 
         do {
-            let loaded = try await Product.products(for: productIDs)
+            let loaded = try await Product.products(for: [productId])
+            self.product = loaded.first
+            self.isLoading = false
 
-            if loaded.isEmpty {
-                errorMessage = "No products returned. Check Product IDs or StoreKit config."
-            } else {
-                products = loaded
+            if self.product == nil {
+                self.errorMessage = "No product returned for id: \(productId)"
             }
-
-            isLoading = false
         } catch {
-            errorMessage = error.localizedDescription
-            isLoading = false
+            self.isLoading = false
+            self.errorMessage = error.localizedDescription
         }
     }
 
     func purchase(_ product: Product) async {
+        purchaseMessage = nil
         do {
             let result = try await product.purchase()
             switch result {
             case .success:
-                break
+                purchaseMessage = "✅ Purchase success"
             case .userCancelled:
-                break
+                purchaseMessage = "User cancelled"
             case .pending:
-                errorMessage = "Purchase pending"
+                purchaseMessage = "Purchase pending"
             @unknown default:
-                break
+                purchaseMessage = "Unknown purchase state"
             }
         } catch {
-            errorMessage = error.localizedDescription
+            purchaseMessage = error.localizedDescription
         }
     }
 }
