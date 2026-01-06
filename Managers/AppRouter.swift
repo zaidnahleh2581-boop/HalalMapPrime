@@ -17,7 +17,7 @@ final class AppRouter: ObservableObject {
 
     // Jobs DeepLink (existing)
     struct JobsDeepLink: Equatable {
-        var category: String?
+        var category: String? = nil
         var filter: JobAdFilter = .all
     }
     @Published var pendingJobsDeepLink: JobsDeepLink? = nil

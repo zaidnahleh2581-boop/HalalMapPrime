@@ -84,6 +84,7 @@
 		15C0B4C02EFCA2FC00532F0F /* AppLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C0B4BF2EFCA2FC00532F0F /* AppLocationManager.swift */; };
 		15C62E132F0D3DBC00702399 /* AddAddressPremiumView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C62E122F0D3DBC00702399 /* AddAddressPremiumView.swift */; };
 		15C62E152F0D416F00702399 /* AdPreviewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C62E142F0D416F00702399 /* AdPreviewScreen.swift */; };
+		15C62E172F0D4EDD00702399 /* JobAdFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15C62E162F0D4EDD00702399 /* JobAdFilter.swift */; };
 		15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB1F52EE78A810035A83D /* EventAdsService.swift */; };
 		15CEB1F82EE78AB00035A83D /* EventAdComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */; };
 		15CEB2042EE7C5DF0035A83D /* NoticeBoardViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */; };
@@ -167,6 +168,7 @@
 		15C0B4BF2EFCA2FC00532F0F /* AppLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocationManager.swift; sourceTree = "<group>"; };
 		15C62E122F0D3DBC00702399 /* AddAddressPremiumView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddAddressPremiumView.swift; sourceTree = "<group>"; };
 		15C62E142F0D416F00702399 /* AdPreviewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdPreviewScreen.swift; sourceTree = "<group>"; };
+		15C62E162F0D4EDD00702399 /* JobAdFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JobAdFilter.swift; sourceTree = "<group>"; };
 		15CEB1F52EE78A810035A83D /* EventAdsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAdsService.swift; sourceTree = "<group>"; };
 		15CEB1F72EE78AB00035A83D /* EventAdComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventAdComposerView.swift; sourceTree = "<group>"; };
 		15CEB2032EE7C5DF0035A83D /* NoticeBoardViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoticeBoardViews.swift; sourceTree = "<group>"; };
@@ -308,6 +310,7 @@
 			children = (
 				15D014342F02BBCB00D34C64 /* JobAlertsSheet 2.swift */,
 				15D014362F02C07500D34C64 /* jobLegacyBoard.swift */,
+				15C62E162F0D4EDD00702399 /* JobAdFilter.swift */,
 			);
 			path = jobs;
 			sourceTree = "<group>";
@@ -541,6 +544,7 @@
 				15B48CDC2EE1A70C00A88AB7 /* AddStoreViewModel.swift in Sources */,
 				15A0D7922EE05E4C0063ED79 /* PrayerTime.swift in Sources */,
 				151BD9F32EE597800065F10C /* MyAdsView.swift in Sources */,
+				15C62E172F0D4EDD00702399 /* JobAdFilter.swift in Sources */,
 				1560165F2F03305000ABC8BB /* EventAdsBoardViewModel.swift in Sources */,
 				15A0D7A02EE068740063ED79 /* BannerAd.swift in Sources */,
 				15C62E152F0D416F00702399 /* AdPreviewScreen.swift in Sources */,

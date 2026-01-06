@@ -1,32 +1,25 @@
 //
 //  jobLegacyBoard.swift
-//  Halal Map Prime
+//  HalalMapPrime
 //
-//  Created by Zaid Nahleh on 2025-12-23.
-//  Updated by Zaid Nahleh on 2025-12-29.
-//  Copyright © 2025 Zaid Nahleh.
-//  All rights reserved.
+//  Polished UI + Owner-only delete (Anonymous Auth)
+//  Keeps same core logic (jobAds collection + 7 days filter)
 //
-
+//  Created by Zaid Nahleh
+//
 import SwiftUI
-import FirebaseFirestore
 import Combine
+import FirebaseAuth
+import FirebaseFirestore
+// MARK: - Types
 
-// MARK: - أنواع الإعلانات (أبحث عن عمل / أبحث عن موظف)
-
-enum JobAdType: String, CaseIterable {
-    case lookingForJob   // أبحث عن عمل
-    case hiring          // أبحث عن موظف
-}
-
-// فلتر أعلى شاشة الإعلانات
-enum JobAdFilter: String, CaseIterable {
-    case all
+enum JobAdType: String, CaseIterable, Identifiable {
     case lookingForJob
     case hiring
+    var id: String { rawValue }
 }
 
-// MARK: - موديل إعلان الوظيفة القادم من Firebase
+// MARK: - Model
 
 struct JobAd: Identifiable {
     let id: String
@@ -36,45 +29,51 @@ struct JobAd: Identifiable {
     let category: String
     let phone: String
     let createdAt: Date?
+    let ownerId: String
 
-    init?(from doc: DocumentSnapshot) {
-        let data = doc.data() ?? [:]
+    init?(from doc: QueryDocumentSnapshot) {
+        let data = doc.data()
 
         guard
-            let typeRaw = data["type"] as? String,
-            let type = JobAdType(rawValue: typeRaw),
-            let text = data["text"] as? String
-        else {
-            return nil
-        }
+            let typeStr = data["type"] as? String,
+            let type = JobAdType(rawValue: typeStr),
+            let text = data["text"] as? String,
+            let city = data["city"] as? String,
+            let category = data["category"] as? String,
+            let phone = data["phone"] as? String
+        else { return nil }
 
         self.id = doc.documentID
         self.type = type
         self.text = text
-        self.city = data["city"] as? String ?? ""
-        self.category = data["category"] as? String ?? ""
-        self.phone = data["phone"] as? String ?? ""
+        self.city = city
+        self.category = category
+        self.phone = phone
 
         if let ts = data["createdAt"] as? Timestamp {
             self.createdAt = ts.dateValue()
         } else {
             self.createdAt = nil
         }
+
+        self.ownerId = data["ownerId"] as? String ?? ""
     }
 }
 
-// MARK: - ViewModel لعرض الإعلانات من Firebase
+// MARK: - ViewModel
 
+@MainActor
 final class JobAdsBoardViewModel: ObservableObject {
-
     @Published var jobAds: [JobAd] = []
+    @Published var authReady: Bool = false
 
     private let db = Firestore.firestore()
     private var listener: ListenerRegistration?
 
     init() {
-        DispatchQueue.main.async { [weak self] in
-            self?.startListening()
+        Task {
+            await ensureAnonAuth()
+            startListening()
         }
     }
 
@@ -82,23 +81,39 @@ final class JobAdsBoardViewModel: ObservableObject {
         listener?.remove()
     }
 
-    /// الاستماع من مجموعة jobAds مع فلترة الإعلانات الأقدم من ٧ أيام
+    var currentUid: String {
+        Auth.auth().currentUser?.uid ?? ""
+    }
+
+    private func ensureAnonAuth() async {
+        if Auth.auth().currentUser != nil {
+            authReady = true
+            return
+        }
+        do {
+            _ = try await Auth.auth().signInAnonymously()
+            authReady = true
+        } catch {
+            print("Anonymous auth failed: \(error.localizedDescription)")
+            authReady = false
+        }
+    }
+
+    /// listen jobAds (last 7 days only)
     private func startListening() {
+        listener?.remove()
+
         listener = db.collection("jobAds")
             .order(by: "createdAt", descending: true)
             .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+                guard let self else { return }
 
                 if let error = error {
                     print("Error listening for job ads: \(error.localizedDescription)")
                     return
                 }
 
-                guard let docs = snapshot?.documents else {
-                    DispatchQueue.main.async { self.jobAds = [] }
-                    return
-                }
-
+                let docs = snapshot?.documents ?? []
                 let now = Date()
                 let maxAge: TimeInterval = 7 * 24 * 60 * 60
 
@@ -109,17 +124,304 @@ final class JobAdsBoardViewModel: ObservableObject {
                         return now.timeIntervalSince(created) <= maxAge
                     }
 
-                DispatchQueue.main.async {
-                    self.jobAds = ads
-                }
+                self.jobAds = ads
             }
+    }
+
+    func delete(ad: JobAd) async {
+        guard !ad.id.isEmpty else { return }
+        guard ad.ownerId == currentUid else { return }
+
+        do {
+            try await db.collection("jobAds").document(ad.id).delete()
+        } catch {
+            print("Delete failed: \(error.localizedDescription)")
+        }
     }
 }
 
-// MARK: - شاشة إنشاء إعلان وظيفة (جمل جاهزة + حفظ في Firebase)
+// MARK: - Main Board View
+
+struct JobAdsBoardView: View {
+    @EnvironmentObject var lang: LanguageManager
+    @StateObject private var vm = JobAdsBoardViewModel()
+
+    @State private var showComposer = false
+    @State private var query: String = ""
+    @State private var filterType: JobAdType? = nil
+
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
+
+    private var filtered: [JobAd] {
+        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+
+        return vm.jobAds.filter { ad in
+            let matchesType = (filterType == nil) ? true : (ad.type == filterType)
+            let matchesQuery: Bool
+            if q.isEmpty {
+                matchesQuery = true
+            } else {
+                matchesQuery =
+                    ad.text.lowercased().contains(q) ||
+                    ad.city.lowercased().contains(q) ||
+                    ad.category.lowercased().contains(q) ||
+                    ad.phone.lowercased().contains(q)
+            }
+            return matchesType && matchesQuery
+        }
+    }
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(.systemGroupedBackground).ignoresSafeArea()
+
+                VStack(spacing: 12) {
+                    headerControls
+
+                    if filtered.isEmpty {
+                        emptyState
+                    } else {
+                        ScrollView {
+                            LazyVStack(spacing: 12) {
+                                ForEach(filtered) { ad in
+                                    JobAdCardView(
+                                        ad: ad,
+                                        isArabic: lang.isArabic,
+                                        canDelete: (ad.ownerId == vm.currentUid),
+                                        onDelete: {
+                                            Task { await vm.delete(ad: ad) }
+                                        }
+                                    )
+                                    .padding(.horizontal, 14)
+                                }
+                            }
+                            .padding(.vertical, 6)
+                        }
+                    }
+                }
+            }
+            .navigationTitle(L("الوظائف", "Jobs"))
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showComposer = true
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                    }
+                    .accessibilityLabel(L("إضافة إعلان", "Add Ad"))
+                }
+            }
+            .sheet(isPresented: $showComposer) {
+                JobAdComposerView()
+                    .environmentObject(lang)
+            }
+        }
+    }
+
+    private var headerControls: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 10) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(.secondary)
+                TextField(L("ابحث (مدينة/تصنيف/نص/هاتف)", "Search (city/category/text/phone)"), text: $query)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+            }
+            .padding(12)
+            .background(.thinMaterial)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+
+            HStack(spacing: 10) {
+                filterChip(title: L("الكل", "All"), isOn: filterType == nil) {
+                    filterType = nil
+                }
+                filterChip(title: L("أبحث عن عمل", "Looking"), isOn: filterType == .lookingForJob) {
+                    filterType = .lookingForJob
+                }
+                filterChip(title: L("أبحث عن موظف", "Hiring"), isOn: filterType == .hiring) {
+                    filterType = .hiring
+                }
+            }
+            .padding(.horizontal, 14)
+        }
+    }
+
+    private func filterChip(title: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background(isOn ? Color.blue.opacity(0.18) : Color.secondary.opacity(0.10))
+                .foregroundColor(isOn ? .blue : .primary)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "briefcase.fill")
+                .font(.system(size: 44))
+                .foregroundColor(.secondary)
+            Text(L("لا يوجد إعلانات حالياً", "No ads right now"))
+                .font(.headline)
+            Text(L("اضغط + لإضافة إعلان جديد.", "Tap + to add a new ad."))
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding(24)
+    }
+}
+
+// MARK: - Card View
+
+private struct JobAdCardView: View {
+    let ad: JobAd
+    let isArabic: Bool
+    let canDelete: Bool
+    let onDelete: () -> Void
+
+    private func L(_ ar: String, _ en: String) -> String { isArabic ? ar : en }
+
+    private var typeTitle: String {
+        switch ad.type {
+        case .lookingForJob: return L("أبحث عن عمل", "Looking for job")
+        case .hiring: return L("أبحث عن موظف", "Hiring")
+        }
+    }
+
+    private var typeIcon: String {
+        switch ad.type {
+        case .lookingForJob: return "person.fill"
+        case .hiring: return "person.badge.plus"
+        }
+    }
+
+    private var phoneURL: URL? {
+        let cleaned = ad.phone
+            .replacingOccurrences(of: " ", with: "")
+            .replacingOccurrences(of: "-", with: "")
+            .replacingOccurrences(of: "(", with: "")
+            .replacingOccurrences(of: ")", with: "")
+        return URL(string: "tel://\(cleaned)")
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top) {
+                HStack(spacing: 8) {
+                    Image(systemName: typeIcon)
+                        .foregroundColor(.blue)
+                    Text(typeTitle)
+                        .font(.headline)
+                }
+                Spacer()
+                if let d = ad.createdAt {
+                    Text(d.formatted(date: .abbreviated, time: .omitted))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+
+            Text(ad.text)
+                .font(.subheadline)
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 8) {
+                badge(icon: "mappin.and.ellipse", text: ad.city)
+                badge(icon: "tag.fill", text: ad.category)
+            }
+
+            HStack(spacing: 10) {
+                if let phoneURL {
+                    Link(destination: phoneURL) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "phone.fill")
+                            Text(ad.phone)
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.green.opacity(0.18))
+                        .foregroundColor(.green)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                } else {
+                    HStack(spacing: 8) {
+                        Image(systemName: "phone.fill")
+                        Text(ad.phone)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.vertical, 10)
+                    .frame(maxWidth: .infinity)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.secondary)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+
+                if canDelete {
+                    Button(role: .destructive) {
+                        onDelete()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "trash.fill")
+                            Text(L("حذف", "Delete"))
+                        }
+                        .font(.subheadline.weight(.semibold))
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.red.opacity(0.14))
+                        .foregroundColor(.red)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+
+            if canDelete {
+                Text(L("هذا إعلانك — يمكنك حذفه.", "This is your ad — you can delete it."))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.black.opacity(0.04), lineWidth: 1)
+        )
+        .contextMenu {
+            if canDelete {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label(L("حذف الإعلان", "Delete Ad"), systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    private func badge(icon: String, text: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon).font(.caption)
+            Text(text).font(.caption.weight(.semibold))
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(Color.secondary.opacity(0.12))
+        .foregroundColor(.secondary)
+        .clipShape(Capsule())
+    }
+}
+
+// MARK: - Composer
 
 struct JobAdComposerView: View {
-
     @EnvironmentObject var lang: LanguageManager
     @Environment(\.dismiss) private var dismiss
 
@@ -134,33 +436,17 @@ struct JobAdComposerView: View {
 
     private let db = Firestore.firestore()
 
+    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
+
     private var categoriesAr: [String] = [
-        "مسجد",
-        "مطعم",
-        "محل تجاري",
-        "سوبرماركت",
-        "محل ملابس",
-        "صالون حلاقة",
-        "مخبز",
-        "مكتب خدمات",
-        "محل بقالة"
+        "مسجد", "مطعم", "محل تجاري", "سوبرماركت", "محل ملابس", "صالون حلاقة", "مخبز", "مكتب خدمات", "محل بقالة"
     ]
 
     private var categoriesEn: [String] = [
-        "Masjid",
-        "Restaurant",
-        "Store",
-        "Supermarket",
-        "Clothing store",
-        "Barber shop",
-        "Bakery",
-        "Office",
-        "Grocery store"
+        "Masjid", "Restaurant", "Store", "Supermarket", "Clothing store", "Barber shop", "Bakery", "Office", "Grocery store"
     ]
 
     private var categories: [String] { lang.isArabic ? categoriesAr : categoriesEn }
-
-    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
 
     private var generatedText: String {
         let safeName = name.isEmpty ? (lang.isArabic ? "الاسم" : "Name") : name
@@ -178,219 +464,182 @@ struct JobAdComposerView: View {
         } else {
             switch adType {
             case .lookingForJob:
-                return "My name is \(safeName). I am looking for a job in \(safeCity) in a \(safeCategory). Phone: \(safePhone)"
+                return "I’m \(safeName) looking for a job in \(safeCity) in \(safeCategory). Contact: \(safePhone)"
             case .hiring:
-                return "My name is \(safeName). I own a \(safeCategory) in \(safeCity) and I am looking for an employee. Phone: \(safePhone)"
+                return "I’m \(safeName), owner of a \(safeCategory) in \(safeCity) and hiring. Contact: \(safePhone)"
             }
         }
-    }
-
-    private var isFormValid: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !city.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !phone.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !selectedCategory.isEmpty
     }
 
     var body: some View {
-        NavigationStack {
-            Form {
+        NavigationView {
+            ZStack {
+                Color(.systemGroupedBackground).ignoresSafeArea()
 
-                Section(header: Text(L("نوع الإعلان", "Ad type"))) {
-                    Picker("", selection: $adType) {
-                        Text(L("أبحث عن عمل", "Looking for a job"))
-                            .tag(JobAdType.lookingForJob)
-                        Text(L("أبحث عن موظف", "Looking for an employee"))
-                            .tag(JobAdType.hiring)
-                    }
-                    .pickerStyle(.segmented)
-                }
+                ScrollView {
+                    VStack(spacing: 14) {
+                        pickerCard
+                        fieldsCard
+                        previewCard
 
-                Section(header: Text(L("البيانات الأساسية", "Basic info"))) {
-                    TextField(L("الاسم (مثال: محمد)", "Name (e.g. Mohamed)"), text: $name)
-
-                    TextField(
-                        L("المنطقة / المدينة (مثال: أستوريا، بروكلين)", "Area / city (e.g. Astoria, Brooklyn)"),
-                        text: $city
-                    )
-
-                    TextField(L("رقم الهاتف", "Phone number"), text: $phone)
-                        .keyboardType(.phonePad)
-                }
-
-                Section(header: Text(L("نوع المكان", "Place type"))) {
-                    Picker(L("اختر المجال", "Select category"), selection: $selectedCategory) {
-                        ForEach(categories, id: \.self) { cat in
-                            Text(cat).tag(cat)
+                        if let errorMessage {
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .font(.footnote)
+                                .padding(.horizontal, 16)
                         }
-                    }
-                }
 
-                Section(header: Text(L("نص الإعلان النهائي", "Final ad text"))) {
-                    Text(generatedText)
-                        .font(.body)
-                        .multilineTextAlignment(.leading)
-                        .padding(.vertical, 4)
-                }
-
-                Section {
-                    Button {
-                        submitToFirebase()
-                    } label: {
-                        HStack {
-                            if isSubmitting { ProgressView() }
-                            Text(L("نشر الإعلان", "Publish ad"))
-                                .frame(maxWidth: .infinity)
+                        Button {
+                            Task { await submit() }
+                        } label: {
+                            HStack {
+                                if isSubmitting { ProgressView().padding(.trailing, 6) }
+                                Text(L("نشر الإعلان", "Post Ad"))
+                            }
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                         }
-                    }
-                    .disabled(!isFormValid || isSubmitting)
-                }
+                        .disabled(isSubmitting)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 6)
 
-                if let errorMessage {
-                    Section {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
-                            .font(.footnote)
-                    }
-                }
-            }
-            .navigationTitle(L("إعلان وظائف", "Job ad"))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark").imageScale(.medium)
-                    }
-                }
-            }
-        }
-    }
-
-    private func submitToFirebase() {
-        guard isFormValid else { return }
-
-        isSubmitting = true
-        errorMessage = nil
-
-        let data: [String: Any] = [
-            "type"      : adType.rawValue,
-            "text"      : generatedText,
-            "city"      : city.trimmingCharacters(in: .whitespaces),
-            "category"  : selectedCategory,
-            "phone"     : phone.trimmingCharacters(in: .whitespaces),
-            "createdAt" : FieldValue.serverTimestamp()
-        ]
-
-        db.collection("jobAds").addDocument(data: data) { error in
-            DispatchQueue.main.async {
-                self.isSubmitting = false
-                if let error = error {
-                    self.errorMessage = error.localizedDescription
-                } else {
-                    self.dismiss()
-                }
-            }
-        }
-    }
-}
-
-// MARK: - شاشة عرض إعلانات الوظائف (القديمة الواضحة)
-
-struct JobAdsBoardView: View {
-
-    @EnvironmentObject var lang: LanguageManager
-
-    @StateObject private var viewModel = JobAdsBoardViewModel()
-    @State private var showComposer: Bool = false
-    @State private var selectedFilter: JobAdFilter = .all
-
-    private func L(_ ar: String, _ en: String) -> String { lang.isArabic ? ar : en }
-
-    private var filteredAds: [JobAd] {
-        viewModel.jobAds.filter { ad in
-            switch selectedFilter {
-            case .all: return true
-            case .lookingForJob: return ad.type == .lookingForJob
-            case .hiring: return ad.type == .hiring
-            }
-        }
-    }
-
-    private var dateFormatter: DateFormatter {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .short
-        return df
-    }
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section(header: Text(L("إعلانات الوظائف", "Job ads"))) {
-
-                    Picker(L("فلتر", "Filter"), selection: $selectedFilter) {
-                        Text(L("الكل", "All")).tag(JobAdFilter.all)
-                        Text(L("أبحث عن عمل", "Looking for job")).tag(JobAdFilter.lookingForJob)
-                        Text(L("أبحث عن موظف", "Hiring")).tag(JobAdFilter.hiring)
-                    }
-                    .pickerStyle(.segmented)
-
-                    if filteredAds.isEmpty {
-                        Text(L("لا توجد إعلانات حالياً.", "No job ads yet."))
+                        Text(L("سيتم حذف الإعلانات تلقائياً من العرض بعد ٧ أيام.", "Ads auto-hide after 7 days."))
+                            .font(.caption)
                             .foregroundColor(.secondary)
-                            .padding(.vertical, 8)
-                    } else {
-                        ForEach(filteredAds) { ad in
-                            jobAdRow(ad)
-                        }
+                            .padding(.bottom, 20)
                     }
+                    .padding(.top, 10)
                 }
             }
-            .navigationTitle(L("وظائف", "Jobs"))
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(L("إضافة إعلان وظيفة", "Create Job Ad"))
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showComposer = true } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .imageScale(.large)
-                    }
-                    .accessibilityLabel(L("إضافة إعلان وظيفة", "Add job ad"))
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(L("إغلاق", "Close")) { dismiss() }
                 }
-            }
-            .sheet(isPresented: $showComposer) {
-                JobAdComposerView()
-                    .environmentObject(lang)
             }
         }
     }
 
-    @ViewBuilder
-    private func jobAdRow(_ ad: JobAd) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private var pickerCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("نوع الإعلان", "Ad Type"))
+                .font(.headline)
 
-            Text(
-                ad.type == .lookingForJob
-                ? L("أبحث عن عمل", "Looking for a job")
-                : L("أبحث عن موظف", "Hiring")
-            )
-            .font(.headline)
+            Picker("", selection: $adType) {
+                Text(L("أبحث عن عمل", "Looking for Job")).tag(JobAdType.lookingForJob)
+                Text(L("أبحث عن موظف", "Hiring")).tag(JobAdType.hiring)
+            }
+            .pickerStyle(.segmented)
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 14)
+    }
 
-            Text(ad.text)
-                .font(.subheadline)
-                .fixedSize(horizontal: false, vertical: true)
+    private var fieldsCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L("المعلومات", "Details"))
+                .font(.headline)
 
-            HStack {
-                if !ad.city.isEmpty {
-                    Label(ad.city, systemImage: "mappin.and.ellipse")
-                }
-                Spacer()
-                if let created = ad.createdAt {
-                    Text(dateFormatter.string(from: created))
+            field(title: L("الاسم", "Name"), text: $name)
+            field(title: L("المدينة", "City"), text: $city)
+            field(title: L("رقم الهاتف", "Phone"), text: $phone, keyboard: .phonePad)
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("التصنيف", "Category"))
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                Menu {
+                    ForEach(categories, id: \.self) { c in
+                        Button(c) { selectedCategory = c }
+                    }
+                } label: {
+                    HStack {
+                        Text(selectedCategory.isEmpty ? L("اختر التصنيف", "Choose category") : selectedCategory)
+                            .foregroundColor(selectedCategory.isEmpty ? .secondary : .primary)
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.10))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
             }
-            .font(.footnote)
-            .foregroundColor(.secondary)
         }
-        .padding(.vertical, 4)
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 14)
+    }
+
+    private var previewCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(L("معاينة الإعلان", "Preview"))
+                .font(.headline)
+
+            Text(generatedText)
+                .font(.subheadline)
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.secondary.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .padding(14)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .padding(.horizontal, 14)
+    }
+
+    private func field(title: String, text: Binding<String>, keyboard: UIKeyboardType = .default) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            TextField(title, text: text)
+                .keyboardType(keyboard)
+                .textInputAutocapitalization(.words)
+                .padding(12)
+                .background(Color.secondary.opacity(0.10))
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+    }
+
+    private func ensureAnonAuthIfNeeded() async throws {
+        if Auth.auth().currentUser != nil { return }
+        _ = try await Auth.auth().signInAnonymously()
+    }
+
+    private func submit() async {
+        errorMessage = nil
+        isSubmitting = true
+        defer { isSubmitting = false }
+
+        do {
+            try await ensureAnonAuthIfNeeded()
+
+            let uid = Auth.auth().currentUser?.uid ?? ""
+
+            let doc: [String: Any] = [
+                "type": adType.rawValue,
+                "text": generatedText,
+                "city": city.isEmpty ? "-" : city,
+                "category": selectedCategory.isEmpty ? (lang.isArabic ? "محل تجاري" : "Store") : selectedCategory,
+                "phone": phone.isEmpty ? "-" : phone,
+                "createdAt": FieldValue.serverTimestamp(),
+                "ownerId": uid
+            ]
+
+            _ = try await db.collection("jobAds").addDocument(data: doc)
+            dismiss()
+        } catch {
+            errorMessage = L("حصل خطأ أثناء النشر. حاول مرة ثانية.", "Failed to post. Please try again.")
+            print("Submit job ad failed: \(error.localizedDescription)")
+        }
     }
 }
