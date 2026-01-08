@@ -144,7 +144,7 @@ struct HomeOverviewScreen: View {
     // MARK: - Featured Slider (Prime + FreeOnce)
 
     private var featuredSliderSection: some View {
-        let featured = adsStore.activeAds.filter { $0.plan == .prime || $0.plan == .freeOnce }
+        let featured = adsStore.activePublicAds.filter { $0.plan == .prime || $0.plan == .freeOnce }
 
         return Group {
             if featured.isEmpty {
@@ -172,7 +172,7 @@ struct HomeOverviewScreen: View {
     // MARK: - Monthly Spotlight
 
     private var monthlySpotlightSection: some View {
-        let monthly = adsStore.activeAds.filter { $0.plan == .monthly }
+        let monthly = adsStore.activePublicAds.filter { $0.plan == .monthly }
 
         return Group {
             if monthly.isEmpty {
@@ -205,12 +205,12 @@ struct HomeOverviewScreen: View {
     // MARK: - Weekly Deals
 
     private var weeklyDealsSection: some View {
-        let weekly = adsStore.activeAds.filter { $0.plan == .weekly }
+        let weekly = adsStore.activePublicAds.filter { $0.plan == .weekly }
 
         return Group {
             if weekly.isEmpty {
                 // if everything empty, show one empty state
-                if adsStore.activeAds.isEmpty {
+                if weekly.isEmpty {
                     Text(L("لا توجد إعلانات حالياً.", "No ads right now."))
                         .font(.footnote.weight(.semibold))
                         .foregroundColor(.secondary)

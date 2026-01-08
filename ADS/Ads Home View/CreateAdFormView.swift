@@ -293,7 +293,7 @@ struct CreateAdFormView: View {
                 }
 
                 // ✅ Convert selected images -> Base64 & save into draft
-                draft.imageBase64s = imageDatas.map { $0.base64EncodedString() }
+                draft.imageBase64s = []   // مؤقتاً: بدون صور
 
                 onSaved?(draft)
 

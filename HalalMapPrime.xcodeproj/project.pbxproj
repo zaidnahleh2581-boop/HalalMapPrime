@@ -12,7 +12,6 @@
 		151BD9E22EE521030065F10C /* AppLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E12EE521030065F10C /* AppLanguage.swift */; };
 		151BD9E42EE5223D0065F10C /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E32EE5223D0065F10C /* LanguageManager.swift */; };
 		151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E52EE522760065F10C /* LanguageSelectionView.swift */; };
-		151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9E92EE528050065F10C /* AdsHomeScreen.swift */; };
 		151BD9ED2EE596EC0065F10C /* AdsHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */; };
 		151BD9EF2EE597260065F10C /* SelectAdPlanView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */; };
 		151BD9F12EE597570065F10C /* AddHalalPlaceFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */; };
@@ -103,7 +102,6 @@
 		151BD9E12EE521030065F10C /* AppLanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppLanguage.swift; path = views/AppLanguage.swift; sourceTree = SOURCE_ROOT; };
 		151BD9E32EE5223D0065F10C /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		151BD9E52EE522760065F10C /* LanguageSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSelectionView.swift; sourceTree = "<group>"; };
-		151BD9E92EE528050065F10C /* AdsHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeScreen.swift; sourceTree = "<group>"; };
 		151BD9EC2EE596EC0065F10C /* AdsHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdsHomeView.swift; sourceTree = "<group>"; };
 		151BD9EE2EE597260065F10C /* SelectAdPlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAdPlanView.swift; sourceTree = "<group>"; };
 		151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddHalalPlaceFormView.swift; sourceTree = "<group>"; };
@@ -181,6 +179,16 @@
 		15F1CE5C2F035432007C72CA /* MonthlyEventPaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyEventPaywallView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		15626C962F103E6400D23C67 /* Exceptions for "HalalMapPrime" folder in "HalalMapPrime" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 15A0D7722EE055040063ED79 /* HalalMapPrime */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		15109F932EFD807D0068DFE3 /* helpers */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
@@ -189,6 +197,9 @@
 		};
 		15A0D7752EE055040063ED79 /* HalalMapPrime */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				15626C962F103E6400D23C67 /* Exceptions for "HalalMapPrime" folder in "HalalMapPrime" target */,
+			);
 			path = HalalMapPrime;
 			sourceTree = "<group>";
 		};
@@ -282,7 +293,6 @@
 				153BA6542F05677E000D22FD /* AdsPrivacyView.swift */,
 				151BD9F02EE597570065F10C /* AddHalalPlaceFormView.swift */,
 				153BA5DE2F0490D7000D22FD /* MyPlacesStore.swift */,
-				151BD9E92EE528050065F10C /* AdsHomeScreen.swift */,
 				151BD9F22EE597800065F10C /* MyAdsView.swift */,
 				15A0D79F2EE068740063ED79 /* BannerAd.swift */,
 				153BA5E22F0495ED000D22FD /* ActivePlacesStore.swift */,
@@ -523,7 +533,6 @@
 				156A32422F00940E00819D25 /* AddPlaceCategory.swift in Sources */,
 				15A0D7882EE05AF00063ED79 /* MapScreen.swift in Sources */,
 				153BA6752F06A648000D22FD /* FreeAdStateStore.swift in Sources */,
-				151BD9EA2EE528050065F10C /* AdsHomeScreen.swift in Sources */,
 				15CEB1F62EE78A810035A83D /* EventAdsService.swift in Sources */,
 				151BD9E62EE522760065F10C /* LanguageSelectionView.swift in Sources */,
 				15CEB20A2EE7CC780035A83D /* EventAdsBoardView.swift in Sources */,
@@ -729,11 +738,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = HalalMapPrime/Assets.xcassets;
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HalalMapPrime/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby halal places and jobs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -754,6 +764,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -763,11 +774,12 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_ASSET_PATHS = HalalMapPrime/Assets.xcassets;
 				DEVELOPMENT_TEAM = Q839X9CL76;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = HalalMapPrime/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "We use your location to show nearby halal places and jobs.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -788,6 +800,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};

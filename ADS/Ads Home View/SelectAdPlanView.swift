@@ -60,7 +60,7 @@ struct SelectAdPlanView: View {
                         planDisplayTitleEN: planDisplayTitleEN(plan),
                         onSaved: { draft in
                             adsStore.createAdFromDraft(draft: draft, plan: plan)
-                            adsStore.load()
+                            // لا داعي load() لأن AdsStore يعمل reload بعد الحفظ
                             showCreateForm = false
                             dismiss()
                         }
